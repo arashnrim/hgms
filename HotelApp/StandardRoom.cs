@@ -3,8 +3,6 @@
 // Student Name     : Sim Ri Sheng
 //==========================================================
 
-using System.Security.Cryptography.X509Certificates;
-
 namespace HotelApp
 {
     internal class StandardRoom :Room

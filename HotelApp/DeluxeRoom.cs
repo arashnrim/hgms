@@ -2,6 +2,7 @@
 // Student Number   : REDACTED
 // Student Name     : Sim Ri Sheng
 //==========================================================
+
 namespace HotelApp
 {
     internal class DeluxeRoom : Room
