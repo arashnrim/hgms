@@ -13,27 +13,35 @@ namespace HotelApp
         private DateTime checkoutDate;
         public DateTime CheckoutDate { get; set; }
 
-        // TODO: Implement roomList
+        private List<Room> roomList;
+        public List<Room> RoomList { get; set; }
 
         public Stay() { }
-        public Stay(DateTime cid, DateTime cod)
+        public Stay(DateTime cid, DateTime cod, List<Room> rl)
         {
             CheckinDate = cid;
-            checkoutDate = cod;
+            CheckoutDate = cod;
+            RoomList = rl;
         }
 
-        // TODO: Implement AddRoom()
+        public void AddRoom(Room r)
+        {
+            RoomList.Add(r);
+        }
 
-        // TODO: Call CalculateCharges() per room and calculate the total
         public double CalculateTotal()
         {
-            throw new NotImplementedException();
+            double total = 0;
+            foreach (Room room in RoomList)
+            {
+                total += room.CalculateCharges();
+            }
+            return total;
         }
 
-        // TODO: Add "Number of rooms: {RoomList.Count}" to ToString()
         public override string ToString()
         {
-            return $"Checkin date: {CheckinDate.ToString("dd/MM/yyyy")}, Checkout date: {CheckoutDate.ToString("dd/mm/yyyy")}";
+            return $"Checkin date: {CheckinDate.ToString("dd/MM/yyyy")}, Checkout date: {CheckoutDate.ToString("dd/mm/yyyy")}, Number of rooms {RoomList.Count}";
         }
     }
 }
