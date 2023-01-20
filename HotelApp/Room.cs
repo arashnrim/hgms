@@ -9,13 +9,13 @@ namespace HotelApp
     {
         private int roomNumber;
         public int RoomNumber { 
-            get {return roomNumber; }
-            set { RoomNumber = value; } 
+            get { return roomNumber; }
+            set { roomNumber = value; } 
         }
 
         private string bedConfiguration;
         public string BedConfiguration
-        {
+        { 
             get { return bedConfiguration; }
             set { bedConfiguration = value; }
         }
