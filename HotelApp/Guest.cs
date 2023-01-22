@@ -34,7 +34,7 @@ namespace HotelApp
 
         public override string ToString()
         {
-            return $"Name: {Name}, Passport number: {PassportNum}, Stay information: {HotelStay.ToString()}, Membership information: {Member.ToString()} Checked in: {(IsCheckedin ? "Yes" : "No")}";
+            return $"Name: {Name}, Passport number: {PassportNum}, Stay information: {HotelStay.ToString()}, Membership information: {Member.ToString()}, Checked in: {(IsCheckedin ? "Yes" : "No")}";
         }
     }
 }
