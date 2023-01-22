@@ -27,7 +27,7 @@ while (cont)
             // TODO: Register a new guest
             break;
         case "4":
-            // TODO: Check-in a guest
+            CheckinGuest(guests, rooms);
             break;
         case "5":
             // TODO: Show stay details for a guest
@@ -59,13 +59,247 @@ void DisplayMenu()
     Console.WriteLine("[0] Exit");
 }
 
-void ListAvailableRooms(List<Room> r)
+List<Room> GetAvailableRooms(List<Room> r)
 {
-    Console.WriteLine("The following rooms are available for check-in:");
+    List<Room> availableRooms = new List<Room>();
     foreach (Room room in r)
     {
         if (room.IsAvail)
-            Console.WriteLine(room);
+            availableRooms.Add(room);
+    }
+
+    return availableRooms;
+}
+
+void ListAvailableRooms(List<Room> r)
+{
+    List<Room> availableRooms = GetAvailableRooms(r);
+    Console.WriteLine("The following rooms are available for check-in:");
+    foreach (Room room in availableRooms)
+        Console.WriteLine(room);
+}
+
+void ListGuests(List<Guest> g)
+{
+    Console.WriteLine("The following guests are registered:");
+    foreach (Guest guest in g)
+    {
+        Console.WriteLine(guest);
+    }
+}
+
+List<Guest> GetAvailableGuests(List<Guest> g)
+{
+    List<Guest> availableGuests = new List<Guest>();
+    foreach (Guest guest in g)
+    {
+        if (!guest.IsCheckedin)
+            availableGuests.Add(guest);
+    }
+
+    return availableGuests;
+}
+
+(bool, int?) ValidateIntInput(int lowerBound, int higherBound, bool offset, string prompt)
+{
+    Console.Write(prompt);
+    try
+    {
+        int input = Convert.ToInt32(Console.ReadLine()) - (offset ? 1 : 0);
+        if (input >= lowerBound && input <= higherBound)
+            return (true, input);
+        else
+            throw new ArgumentOutOfRangeException(nameof(input));
+    }
+    catch (FormatException)
+    {
+        Console.WriteLine($"Input should be a numerical value.");
+        return (false, null);
+    }
+    catch (ArgumentOutOfRangeException)
+    {
+        Console.WriteLine($"Input should be between {lowerBound} and {higherBound} inclusive.");
+        return (false, null);
+    }
+}
+
+(bool, DateTime?) ValidateDateTimeInput(string format, string prompt, DateTime? compareDate = null)
+{
+    Console.Write(prompt);
+    try
+    {
+        DateTime input =
+            DateTime.ParseExact(Console.ReadLine(), format, System.Globalization.CultureInfo.InvariantCulture);
+        if (compareDate != null)
+        {
+            int difference = input.Subtract(compareDate.Value).Days;
+            if (difference < 0)
+                throw new ArgumentOutOfRangeException(nameof(input), "The given date is before the previous date.");
+        }
+
+        return (true, input);
+    }
+    catch (FormatException)
+    {
+        Console.WriteLine($"Input should be in the format dd/MM/yyyy.");
+        return (false, null);
+    }
+    catch (ArgumentOutOfRangeException ex)
+    {
+        Console.WriteLine(ex.Message);
+        return (false, null);
+    }
+}
+
+(bool, bool?) ValidateBooleanInput(string prompt)
+{
+    Console.Write(prompt);
+    try
+    {
+        string input = Console.ReadLine().ToUpper();
+        if (input != "Y" && input != "N")
+            throw new ArgumentOutOfRangeException(nameof(input), "Input should be either Y or N.");
+        bool inputBoolean = input == "Y";
+        return (true, inputBoolean);
+    }
+    catch (ArgumentOutOfRangeException ex)
+    {
+        Console.WriteLine(ex.Message);
+        return (false, null);
+    }
+}
+
+void CheckinGuest(List<Guest> g, List<Room> r)
+{
+    // Shows a list of available guests and prompts the user to select a guest to check-in
+    Guest? guest;
+    ListGuests(GetAvailableGuests(g));
+    while (true)
+    {
+        var values = ValidateIntInput(0, GetAvailableGuests(g).Count, true, $"Who is checking in? Enter 1 to {GetAvailableGuests(g).Count} inclusive: ");
+        if (values.Item1)
+        {
+            guest = g[values.Item2.Value];
+            break;
+        }
+    }
+
+    // Prompts the user for the check-in and check-out date
+    DateTime? checkinDate = null;
+    DateTime? checkoutDate = null;
+    while (true)
+    {
+        var values = ValidateDateTimeInput("dd/MM/yyyy", $"\nWhen is {guest.Name} checking in? Enter in the format dd/MM/yyyy: ");
+        if (values.Item1)
+        {
+            checkinDate = values.Item2.Value;
+            break;
+        }
+    }
+    while (true)
+    {
+        var values = ValidateDateTimeInput("dd/MM/yyyy", $"When is {guest.Name} checking out? Enter in the format dd/MM/yyyy: ", checkinDate);
+        if (values.Item1)
+        {
+            checkoutDate = values.Item2.Value;
+            break;
+        }
+    }
+
+    // Creates a new Stay object based on the provided information
+    List<Room> stayRooms = new List<Room>();
+    Stay stay = new Stay(checkinDate.Value, checkoutDate.Value, rooms);
+
+    // Lists the available rooms and prompts the user to select a room
+    bool repeat = true;
+    do
+    {
+        Console.WriteLine();
+        ListAvailableRooms(r);
+        List<Room> availableRooms = GetAvailableRooms(r);
+
+        while (true)
+        {
+            var values = ValidateIntInput(0, availableRooms.Count, true,
+                $"Which room is {guest.Name} staying in? Enter 1 to {availableRooms.Count} inclusive: ");
+            if (values.Item1)
+            {
+                Room bookedRoom = availableRooms[values.Item2.Value];
+
+                // Makes the room unavailable
+                r.Find(room => room.RoomNumber == bookedRoom.RoomNumber).IsAvail = false;
+
+                // Configures the room with the additional information
+                if (bookedRoom is StandardRoom)
+                {
+                    while (true)
+                    {
+                        var wfValues =
+                            ValidateBooleanInput($"Is Wi-Fi needed for room {bookedRoom.RoomNumber}? (Y/N): ");
+                        if (wfValues.Item1)
+                        {
+                            ((StandardRoom)bookedRoom).RequireWifi = wfValues.Item2.Value;
+                            break;
+                        }
+                    }
+
+                    while (true)
+                    {
+                        var brValues =
+                            ValidateBooleanInput($"Is breakfast needed for room {bookedRoom.RoomNumber}? (Y/N): ");
+                        if (brValues.Item1)
+                        {
+                            ((StandardRoom)bookedRoom).RequireBreakfast = brValues.Item2.Value;
+                            break;
+                        }
+                    }
+                }
+                else if (bookedRoom is DeluxeRoom)
+                {
+                    while (true)
+                    {
+                        var abValues =
+                            ValidateBooleanInput(
+                                $"Is an additional bed needed for room {bookedRoom.RoomNumber}? (Y/N): ");
+                        if (abValues.Item1)
+                        {
+                            ((DeluxeRoom)bookedRoom).AdditionalBed = abValues.Item2.Value;
+                            break;
+                        }
+                    }
+                }
+
+                stayRooms.Add(availableRooms[values.Item2.Value]);
+                break;
+            }
+        }
+
+        // Currently manually hard-coded restricted to 2 rooms per stay. Edit here if necessary.
+        if (stayRooms.Count < 2)
+        {
+            while (true)
+            {
+                var rValues = ValidateBooleanInput("Add another room? (Y/N) ");
+                if (rValues.Item1)
+                {
+                    repeat = rValues.Item2.Value;
+                    break;
+                }
+            }
+        }
+    } while (repeat);
+
+    // Updates the check-in status of the guest
+    guest.IsCheckedin = true;
+
+    // Updates the guest's stay information
+    guest.HotelStay = stay;
+
+    Console.WriteLine("\n========== Check-in successful ==========");
+    Console.WriteLine($"Guest {guest.Name} has been checked in from {stay.CheckinDate.ToString("dd/MM/yyyy")} to {stay.CheckoutDate.ToString("dd/MM/yyyy")}. The following rooms will be occupied:");
+    foreach (Room room in stayRooms)
+    {
+        Console.WriteLine(room.ToString());
     }
 }
 
