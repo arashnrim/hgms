@@ -13,6 +13,7 @@ while (cont)
     DisplayMenu();
     Console.Write("Enter an option: ");
     string choice = Console.ReadLine();
+    Console.WriteLine();
 
     switch (choice)
     {
@@ -20,7 +21,7 @@ while (cont)
             // TODO: List all guests
             break;
         case "2":
-            // TODO: List all available rooms
+            ListAvailableRooms(rooms);
             break;
         case "3":
             // TODO: Register a new guest
@@ -41,6 +42,8 @@ while (cont)
             Console.WriteLine("Invalid option, try again.");
             break;
     }
+
+    Console.WriteLine();
 }
 
 //==========================================================
@@ -54,6 +57,16 @@ void DisplayMenu()
     for (int i = 0; i < options.Length; i++)
         Console.WriteLine($"[{i + 1}] {options[i]}");
     Console.WriteLine("[0] Exit");
+}
+
+void ListAvailableRooms(List<Room> r)
+{
+    Console.WriteLine("The following rooms are available for check-in:");
+    foreach (Room room in r)
+    {
+        if (room.IsAvail)
+            Console.WriteLine(room);
+    }
 }
 
 //==========================================================
