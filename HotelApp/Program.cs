@@ -342,6 +342,7 @@ void InitializeGuests(List<Guest> g, List<Room> r)
         while ((line = sr.ReadLine()) != null)
         {
             string[] data = line.Split(',');
+            Guest guest = new Guest();
 
             // Creates a stay object
             Stay? stay = null;
@@ -362,14 +363,17 @@ void InitializeGuests(List<Guest> g, List<Room> r)
                     Room? room1 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[5]));
                     if (room1 != null)
                     {
-                        if (Convert.ToBoolean(stayData[2]))
+                        if (stayData[2] == "TRUE")
+                        {
+                            guest.IsCheckedin = true;
                             room1.IsAvail = false;
-                        if (Convert.ToBoolean(stayData[6]) && room1 is StandardRoom)
-                            ((StandardRoom)room1).RequireWifi = true;
-                        if (Convert.ToBoolean(stayData[7]) && room1 is StandardRoom)
-                            ((StandardRoom)room1).RequireBreakfast = true;
-                        if (Convert.ToBoolean(stayData[8]) && room1 is DeluxeRoom)
-                            ((DeluxeRoom)room1).AdditionalBed = true;
+                            if (stayData[6] == "TRUE" && room1 is StandardRoom)
+                                ((StandardRoom)room1).RequireWifi = true;
+                            if (stayData[7] == "TRUE" && room1 is StandardRoom)
+                                ((StandardRoom)room1).RequireBreakfast = true;
+                            if (stayData[8] == "TRUE" && room1 is DeluxeRoom)
+                                ((DeluxeRoom)room1).AdditionalBed = true;
+                        }
                         stayRooms.Add(room1);
                     }
                     else
@@ -380,14 +384,16 @@ void InitializeGuests(List<Guest> g, List<Room> r)
                         Room? room2 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[9]));
                         if (room2 != null)
                         {
-                            if (Convert.ToBoolean(stayData[2]))
+                            if (stayData[2] == "TRUE")
+                            {
                                 room2.IsAvail = false;
-                            if (Convert.ToBoolean(stayData[10]) && room2 is StandardRoom)
-                                ((StandardRoom)room2).RequireWifi = true;
-                            if (Convert.ToBoolean(stayData[11]) && room2 is StandardRoom)
-                                ((StandardRoom)room2).RequireBreakfast = true;
-                            if (Convert.ToBoolean(stayData[12]) && room2 is DeluxeRoom)
-                                ((DeluxeRoom)room2).AdditionalBed = true;
+                                if (stayData[10] == "TRUE" && room2 is StandardRoom)
+                                    ((StandardRoom)room2).RequireWifi = true;
+                                if (stayData[11] == "TRUE" && room2 is StandardRoom)
+                                    ((StandardRoom)room2).RequireBreakfast = true;
+                                if (stayData[12] == "TRUE" && room2 is DeluxeRoom)
+                                    ((DeluxeRoom)room2).AdditionalBed = true;
+                            }
                             stayRooms.Add(room2);
                         } else
                             throw new Exception($"Invalid room number {stayData[9]} under {stayData[0]}.");
@@ -403,7 +409,11 @@ void InitializeGuests(List<Guest> g, List<Room> r)
             // Creates a guest object
             if (stay != null)
             {
-                g.Add(new Guest(data[0], data[1], stay, membership));
+                guest.Name = data[0];
+                guest.PassportNum = data[1];
+                guest.HotelStay = stay;
+                guest.Member = membership;
+                g.Add(guest);
             } else
                 throw new Exception("Stay data may be wrongly formatted.");
         }

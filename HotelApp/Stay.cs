@@ -41,7 +41,7 @@ namespace HotelApp
 
         public override string ToString()
         {
-            return $"Checkin date: {CheckinDate.ToString("dd/MM/yyyy")}, Checkout date: {CheckoutDate.ToString("dd/mm/yyyy")}, Number of rooms {RoomList.Count}";
+            return $"Checkin date: {CheckinDate.ToString("dd/MM/yyyy")}, Checkout date: {CheckoutDate.ToString("dd/MM/yyyy")}, Number of rooms {RoomList.Count}";
         }
     }
 }
