@@ -3,28 +3,61 @@
 List<Room> rooms = new List<Room>();
 List<Guest> guests = new List<Guest>();
 
+// Initializes the rooms and guests used in the application.
 InitializeRooms(rooms);
-Console.WriteLine("DEBUG: ========== Rooms (pre-guest init) ==========");
-foreach (Room room in rooms)
-{
-    Console.WriteLine(room);
-}
-
 InitializeGuests(guests, rooms);
-Console.WriteLine("\nDEBUG: ========== Rooms (post-guest-init) ==========");
-foreach (Room room in rooms)
-{
-    Console.WriteLine(room);
-}
 
-Console.WriteLine("\nDEBUG: ========== Guests ==========");
-foreach (Guest guest in guests)
+bool cont = true;
+while (cont)
 {
-    Console.WriteLine(guest);
+    DisplayMenu();
+    Console.Write("Enter an option: ");
+    string choice = Console.ReadLine();
+
+    switch (choice)
+    {
+        case "1":
+            // TODO: List all guests
+            break;
+        case "2":
+            // TODO: List all available rooms
+            break;
+        case "3":
+            // TODO: Register a new guest
+            break;
+        case "4":
+            // TODO: Check-in a guest
+            break;
+        case "5":
+            // TODO: Show stay details for a guest
+            break;
+        case "6":
+            break;
+            // TODO: Extend a guest's stay
+        case "0":
+            cont = false;
+            break;
+        default:
+            Console.WriteLine("Invalid option, try again.");
+            break;
+    }
 }
 
 //==========================================================
-// INITIALIZATION FUNCTIONS
+// METHODS
+//==========================================================
+void DisplayMenu()
+{
+    Console.WriteLine("========== ICT Hotel Guest Management System ==========");
+
+    string[] options = new string[] { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Show stay details for a guest", "Extend a guest's stay" };
+    for (int i = 0; i < options.Length; i++)
+        Console.WriteLine($"[{i + 1}] {options[i]}");
+    Console.WriteLine("[0] Exit");
+}
+
+//==========================================================
+// INITIALIZATION METHODS
 // The functions below are created and called to initialize
 // the required variables and objects for the program to
 // work.
