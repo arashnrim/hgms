@@ -49,6 +49,7 @@ while (cont)
 //==========================================================
 // METHODS
 //==========================================================
+
 void DisplayMenu()
 {
     Console.WriteLine("========== ICT Hotel Guest Management System ==========");
@@ -378,6 +379,8 @@ void InitializeRoom(List<Room> initRoomList, Room? r, Guest g, string checkedIn,
 
 void InitializeGuests(List<Guest> g, List<Room> r)
 {
+    // IMPORTANT: InitializeRooms() must be invoked before this function.
+
     using (StreamReader sr = new StreamReader("Guests.csv"))
     {
         string? line = sr.ReadLine();
