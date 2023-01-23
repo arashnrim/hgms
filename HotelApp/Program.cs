@@ -169,6 +169,50 @@ List<Guest> GetAvailableGuests(List<Guest> g)
     }
 }
 
+// Configures the room with the additional information, like whether Wi-Fi, breakfast, or 
+// an additional bed is required.
+void ConfigureRoom(Room r)
+{
+    if (r is StandardRoom)
+    {
+        while (true)
+        {
+            var wfValues =
+                ValidateBooleanInput($"Is Wi-Fi needed for room {r.RoomNumber}? (Y/N): ");
+            if (wfValues.Item1)
+            {
+                ((StandardRoom)r).RequireWifi = wfValues.Item2.Value;
+                break;
+            }
+        }
+
+        while (true)
+        {
+            var brValues =
+                ValidateBooleanInput($"Is breakfast needed for room {r.RoomNumber}? (Y/N): ");
+            if (brValues.Item1)
+            {
+                ((StandardRoom)r).RequireBreakfast = brValues.Item2.Value;
+                break;
+            }
+        }
+    }
+    else if (r is DeluxeRoom)
+    {
+        while (true)
+        {
+            var abValues =
+                ValidateBooleanInput(
+                    $"Is an additional bed needed for room {r.RoomNumber}? (Y/N): ");
+            if (abValues.Item1)
+            {
+                ((DeluxeRoom)r).AdditionalBed = abValues.Item2.Value;
+                break;
+            }
+        }
+    }
+}
+
 void CheckinGuest(List<Guest> g, List<Room> r)
 {
     // Shows a list of available guests and prompts the user to select a guest to check-in
@@ -185,8 +229,8 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     }
 
     // Prompts the user for the check-in and check-out date
-    DateTime? checkinDate = null;
-    DateTime? checkoutDate = null;
+    DateTime? checkinDate;
+    DateTime? checkoutDate;
     while (true)
     {
         var values = ValidateDateTimeInput("dd/MM/yyyy", $"\nWhen is {guest.Name} checking in? Enter in the format dd/MM/yyyy: ");
@@ -229,45 +273,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
                 // Makes the room unavailable
                 r.Find(room => room.RoomNumber == bookedRoom.RoomNumber).IsAvail = false;
 
-                // Configures the room with the additional information
-                if (bookedRoom is StandardRoom)
-                {
-                    while (true)
-                    {
-                        var wfValues =
-                            ValidateBooleanInput($"Is Wi-Fi needed for room {bookedRoom.RoomNumber}? (Y/N): ");
-                        if (wfValues.Item1)
-                        {
-                            ((StandardRoom)bookedRoom).RequireWifi = wfValues.Item2.Value;
-                            break;
-                        }
-                    }
-
-                    while (true)
-                    {
-                        var brValues =
-                            ValidateBooleanInput($"Is breakfast needed for room {bookedRoom.RoomNumber}? (Y/N): ");
-                        if (brValues.Item1)
-                        {
-                            ((StandardRoom)bookedRoom).RequireBreakfast = brValues.Item2.Value;
-                            break;
-                        }
-                    }
-                }
-                else if (bookedRoom is DeluxeRoom)
-                {
-                    while (true)
-                    {
-                        var abValues =
-                            ValidateBooleanInput(
-                                $"Is an additional bed needed for room {bookedRoom.RoomNumber}? (Y/N): ");
-                        if (abValues.Item1)
-                        {
-                            ((DeluxeRoom)bookedRoom).AdditionalBed = abValues.Item2.Value;
-                            break;
-                        }
-                    }
-                }
+                ConfigureRoom(bookedRoom);
 
                 stayRooms.Add(availableRooms[values.Item2.Value]);
                 break;
@@ -334,6 +340,42 @@ void InitializeRooms(List<Room> r)
     }
 }
 
+void InitializeRoom(List<Room> initRoomList, Room? r, Guest g, string checkedIn, string[] requirements, bool optional = false)
+{
+    try
+    {
+        if (r != null)
+        {
+            if (checkedIn == "TRUE")
+            {
+                g.IsCheckedin = true;
+                r.IsAvail = false;
+                if (requirements[0] == "TRUE" && r is StandardRoom)
+                    ((StandardRoom)r).RequireWifi = true;
+                if (requirements[1] == "TRUE" && r is StandardRoom)
+                    ((StandardRoom)r).RequireBreakfast = true;
+                if (requirements[2] == "TRUE" && r is DeluxeRoom)
+                    ((DeluxeRoom)r).AdditionalBed = true;
+            }
+
+            initRoomList.Add(r);
+        }
+        else
+            throw new ArgumentOutOfRangeException(nameof(initRoomList), "A stay must have at least one room.");
+    }
+    catch (ArgumentOutOfRangeException argEx)
+    {
+        Console.WriteLine(argEx.Message);
+    }
+    catch (FormatException)
+    {
+        if (!optional)
+        {
+            Console.WriteLine("Invalid data format. Please check the data file.");
+        }
+    }
+}
+
 void InitializeGuests(List<Guest> g, List<Room> r)
 {
     using (StreamReader sr = new StreamReader("Guests.csv"))
@@ -361,43 +403,13 @@ void InitializeGuests(List<Guest> g, List<Room> r)
 
                     // Creates a list of rooms that the guest has stayed in
                     Room? room1 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[5]));
-                    if (room1 != null)
-                    {
-                        if (stayData[2] == "TRUE")
-                        {
-                            guest.IsCheckedin = true;
-                            room1.IsAvail = false;
-                            if (stayData[6] == "TRUE" && room1 is StandardRoom)
-                                ((StandardRoom)room1).RequireWifi = true;
-                            if (stayData[7] == "TRUE" && room1 is StandardRoom)
-                                ((StandardRoom)room1).RequireBreakfast = true;
-                            if (stayData[8] == "TRUE" && room1 is DeluxeRoom)
-                                ((DeluxeRoom)room1).AdditionalBed = true;
-                        }
-                        stayRooms.Add(room1);
-                    }
-                    else
-                        throw new Exception("A stay must have at least one room.");
-                    
-                    try
+                    InitializeRoom(stayRooms, room1, guest, stayData[2], new []{stayData[6], stayData[7], stayData[8]}, true);
+
+                    if (stayData[9] != "")
                     {
                         Room? room2 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[9]));
-                        if (room2 != null)
-                        {
-                            if (stayData[2] == "TRUE")
-                            {
-                                room2.IsAvail = false;
-                                if (stayData[10] == "TRUE" && room2 is StandardRoom)
-                                    ((StandardRoom)room2).RequireWifi = true;
-                                if (stayData[11] == "TRUE" && room2 is StandardRoom)
-                                    ((StandardRoom)room2).RequireBreakfast = true;
-                                if (stayData[12] == "TRUE" && room2 is DeluxeRoom)
-                                    ((DeluxeRoom)room2).AdditionalBed = true;
-                            }
-                            stayRooms.Add(room2);
-                        } else
-                            throw new Exception($"Invalid room number {stayData[9]} under {stayData[0]}.");
-                    } catch (FormatException) { }
+                        InitializeRoom(stayRooms, room2, guest, stayData[2], new []{stayData[10], stayData[11], stayData[12]}, true);
+                    }
 
                     stay = new Stay(Convert.ToDateTime(stayData[3]), Convert.ToDateTime(stayData[4]), stayRooms);
                 }
