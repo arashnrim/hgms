@@ -101,30 +101,30 @@ List<Guest> GetAvailableGuests(List<Guest> g)
     return availableGuests;
 }
 
-(bool, int?) ValidateIntInput(int lowerBound, int higherBound, bool offset, string prompt)
+int? ValidateIntInput(int lowerBound, int higherBound, bool offset, string prompt)
 {
     Console.Write(prompt);
     try
     {
         int input = Convert.ToInt32(Console.ReadLine()) - (offset ? 1 : 0);
         if (input >= lowerBound && input <= higherBound)
-            return (true, input);
+            return input;
         else
             throw new ArgumentOutOfRangeException(nameof(input));
     }
     catch (FormatException)
     {
         Console.WriteLine($"Input should be a numerical value.");
-        return (false, null);
+        return null;
     }
     catch (ArgumentOutOfRangeException)
     {
         Console.WriteLine($"Input should be between {lowerBound} and {higherBound} inclusive.");
-        return (false, null);
+        return null;
     }
 }
 
-(bool, DateTime?) ValidateDateTimeInput(string format, string prompt, DateTime? compareDate = null)
+DateTime? ValidateDateTimeInput(string format, string prompt, DateTime? compareDate = null)
 {
     Console.Write(prompt);
     try
@@ -138,21 +138,21 @@ List<Guest> GetAvailableGuests(List<Guest> g)
                 throw new ArgumentOutOfRangeException(nameof(input), "The given date is before the previous date.");
         }
 
-        return (true, input);
+        return input;
     }
     catch (FormatException)
     {
         Console.WriteLine($"Input should be in the format dd/MM/yyyy.");
-        return (false, null);
+        return null;
     }
     catch (ArgumentOutOfRangeException ex)
     {
         Console.WriteLine(ex.Message);
-        return (false, null);
+        return null;
     }
 }
 
-(bool, bool?) ValidateBooleanInput(string prompt)
+bool? ValidateBooleanInput(string prompt)
 {
     Console.Write(prompt);
     try
@@ -161,12 +161,12 @@ List<Guest> GetAvailableGuests(List<Guest> g)
         if (input != "Y" && input != "N")
             throw new ArgumentOutOfRangeException(nameof(input), "Input should be either Y or N.");
         bool inputBoolean = input == "Y";
-        return (true, inputBoolean);
+        return inputBoolean;
     }
     catch (ArgumentOutOfRangeException ex)
     {
         Console.WriteLine(ex.Message);
-        return (false, null);
+        return null;
     }
 }
 
@@ -174,40 +174,34 @@ List<Guest> GetAvailableGuests(List<Guest> g)
 // an additional bed is required.
 void ConfigureRoom(Room r)
 {
-    if (r is StandardRoom)
+    string[] options = new string[] { "Wi-Fi", "breakfast", "an additional bed" };
+    foreach (string option in options)
     {
-        while (true)
-        {
-            var wfValues =
-                ValidateBooleanInput($"Is Wi-Fi needed for room {r.RoomNumber}? (Y/N): ");
-            if (wfValues.Item1)
-            {
-                ((StandardRoom)r).RequireWifi = wfValues.Item2.Value;
-                break;
-            }
-        }
+        // Specifically blacklists the options based on what is allowed for each room type
+        if (r is StandardRoom && option == "an additional bed")
+            continue;
+        if (r is DeluxeRoom && (option == "Wi-Fi" || option == "breakfast"))
+            continue;
 
+        // Prompts the user and configures the room
         while (true)
         {
-            var brValues =
-                ValidateBooleanInput($"Is breakfast needed for room {r.RoomNumber}? (Y/N): ");
-            if (brValues.Item1)
+            var input =
+                ValidateBooleanInput($"Is {option} needed for room {r.RoomNumber}? (Y/N): ");
+            if (input != null)
             {
-                ((StandardRoom)r).RequireBreakfast = brValues.Item2.Value;
-                break;
-            }
-        }
-    }
-    else if (r is DeluxeRoom)
-    {
-        while (true)
-        {
-            var abValues =
-                ValidateBooleanInput(
-                    $"Is an additional bed needed for room {r.RoomNumber}? (Y/N): ");
-            if (abValues.Item1)
-            {
-                ((DeluxeRoom)r).AdditionalBed = abValues.Item2.Value;
+                switch (option)
+                {
+                    case "Wi-Fi":
+                        ((StandardRoom)r).RequireWifi = input.Value;
+                        break;
+                    case "breakfast":
+                        ((StandardRoom)r).RequireBreakfast = input.Value;
+                        break;
+                    case "an additional bed":
+                        ((DeluxeRoom)r).AdditionalBed = input.Value;
+                        break;
+                }
                 break;
             }
         }
@@ -221,10 +215,10 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     ListGuests(GetAvailableGuests(g));
     while (true)
     {
-        var values = ValidateIntInput(0, GetAvailableGuests(g).Count, true, $"Who is checking in? Enter 1 to {GetAvailableGuests(g).Count} inclusive: ");
-        if (values.Item1)
+        var input = ValidateIntInput(0, GetAvailableGuests(g).Count, true, $"Who is checking in? Enter 1 to {GetAvailableGuests(g).Count} inclusive: ");
+        if (input != null)
         {
-            guest = g[values.Item2.Value];
+            guest = g[input.Value];
             break;
         }
     }
@@ -234,19 +228,19 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     DateTime? checkoutDate;
     while (true)
     {
-        var values = ValidateDateTimeInput("dd/MM/yyyy", $"\nWhen is {guest.Name} checking in? Enter in the format dd/MM/yyyy: ");
-        if (values.Item1)
+        var input = ValidateDateTimeInput("dd/MM/yyyy", $"\nWhen is {guest.Name} checking in? Enter in the format dd/MM/yyyy: ");
+        if (input != null)
         {
-            checkinDate = values.Item2.Value;
+            checkinDate = input;
             break;
         }
     }
     while (true)
     {
-        var values = ValidateDateTimeInput("dd/MM/yyyy", $"When is {guest.Name} checking out? Enter in the format dd/MM/yyyy: ", checkinDate);
-        if (values.Item1)
+        var input = ValidateDateTimeInput("dd/MM/yyyy", $"When is {guest.Name} checking out? Enter in the format dd/MM/yyyy: ", checkinDate);
+        if (input != null)
         {
-            checkoutDate = values.Item2.Value;
+            checkoutDate = input;
             break;
         }
     }
@@ -265,18 +259,18 @@ void CheckinGuest(List<Guest> g, List<Room> r)
 
         while (true)
         {
-            var values = ValidateIntInput(0, availableRooms.Count, true,
+            var input = ValidateIntInput(0, availableRooms.Count, true,
                 $"Which room is {guest.Name} staying in? Enter 1 to {availableRooms.Count} inclusive: ");
-            if (values.Item1)
+            if (input != null)
             {
-                Room bookedRoom = availableRooms[values.Item2.Value];
+                Room bookedRoom = availableRooms[input.Value];
 
                 // Makes the room unavailable
                 r.Find(room => room.RoomNumber == bookedRoom.RoomNumber).IsAvail = false;
 
                 ConfigureRoom(bookedRoom);
 
-                stayRooms.Add(availableRooms[values.Item2.Value]);
+                stayRooms.Add(availableRooms[input.Value]);
                 break;
             }
         }
@@ -286,10 +280,10 @@ void CheckinGuest(List<Guest> g, List<Room> r)
         {
             while (true)
             {
-                var rValues = ValidateBooleanInput("Add another room? (Y/N) ");
-                if (rValues.Item1)
+                var input = ValidateBooleanInput("Add another room? (Y/N) ");
+                if (input != null)
                 {
-                    repeat = rValues.Item2.Value;
+                    repeat = input.Value;
                     break;
                 }
             }
