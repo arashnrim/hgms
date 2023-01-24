@@ -1,4 +1,5 @@
 ﻿using HotelApp;
+using System.Collections.Generic;
 
 List<Room> rooms = new List<Room>();
 List<Guest> guests = new List<Guest>();
@@ -19,12 +20,14 @@ while (cont)
     {
         case "1":
             // TODO: List all guests
+            guestlist();
             break;
         case "2":
             ListAvailableRooms(rooms);
             break;
         case "3":
             // TODO: Register a new guest
+            guest_reg();
             break;
         case "4":
             CheckinGuest(guests, rooms);
@@ -427,4 +430,43 @@ void InitializeGuests(List<Guest> g, List<Room> r)
                 throw new Exception("Stay data may be wrongly formatted.");
         }
     }
+}
+
+void guestlist()
+{
+    // Creates a loop to access each guest information in the list
+    foreach (Guest g in guests)
+    {
+        // Checks if the guest have registered a room to stay in. If not Check in Date and Check out Date will be Null
+        if (g.HotelStay.CheckinDate == DateTime.MinValue)
+        {
+            Console.WriteLine("\n\n===================================");
+            Console.WriteLine("Guest's name: {0,0} \nPassport Number: {1,0} \nMembership: {2,0} \nPoints: {3,0} \nCheck in Date: {4,0} \nCheck out Date: {5,0}"
+                , g.Name, g.PassportNum, g.Member.Status, g.Member.Points,"Null","Null");
+        }
+        else
+        {
+            Console.WriteLine("\n\n===================================");
+            Console.WriteLine("Guest's name: {0,0} \nPassport Number: {1,0} \nMembership: {2,0} \nPoints: {3,0} \nCheck in Date: {4,0} \nCheck out Date: {5,0}"
+                , g.Name, g.PassportNum, g.Member.Status, g.Member.Points, g.HotelStay.CheckinDate, g.HotelStay.CheckoutDate);
+        }
+        
+    }
+}
+
+void guest_reg()
+{
+    // Prompts the user for the guest name
+    Console.Write("Guest's name:");
+    string name = Console.ReadLine();
+
+    //Prompts the user for the guest's passport number
+    Console.Write("Guest's passport number:");
+    string p_number = Console.ReadLine();
+
+    //Creates a new guest object and adds to the guest list
+    guests.Add(new Guest(name, p_number,new Stay(),new Membership("Ordinary",0)));
+
+    //Add guest to the Guest CSV file
+    
 }

@@ -26,7 +26,10 @@ namespace HotelApp
         /// <summary>
         /// Initializes a new instance of the <see cref="Stay"/> class.
         /// </summary>
-        public Stay() { }
+        public Stay()
+        {
+            RoomList = new List<Room>() { };
+        }
         /// <summary>
         /// Initializes a new instance of the <see cref="Stay"/> class with the required parameters.
         /// </summary>
