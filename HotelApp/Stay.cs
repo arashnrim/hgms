@@ -32,12 +32,11 @@ namespace HotelApp
         /// </summary>
         /// <param name="cid">The date the guest checks into the hotel.</param>
         /// <param name="cod">The date the guest checks out of the hotel.</param>
-        /// <param name="rl">The list of rooms associated with this stay.</param>
-        public Stay(DateTime cid, DateTime cod, List<Room> rl)
+        public Stay(DateTime cid, DateTime cod)
         {
             CheckinDate = cid;
             CheckoutDate = cod;
-            RoomList = rl;
+            RoomList = new List<Room>();
         }
 
         /// <summary>
