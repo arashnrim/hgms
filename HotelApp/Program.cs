@@ -36,8 +36,8 @@ while (cont)
             // TODO: Show stay details for a guest
             break;
         case "6":
+            ExtendStay(guests);
             break;
-            // TODO: Extend a guest's stay
         case "0":
             cont = false;
             break;
@@ -92,16 +92,28 @@ void ListGuests(List<Guest> g)
     }
 }
 
-List<Guest> GetAvailableGuests(List<Guest> g)
+List<Guest> GetCheckedoutGuests(List<Guest> g)
 {
-    List<Guest> availableGuests = new List<Guest>();
+    List<Guest> checkedoutGuests = new List<Guest>();
     foreach (Guest guest in g)
     {
         if (!guest.IsCheckedin)
-            availableGuests.Add(guest);
+            checkedoutGuests.Add(guest);
     }
 
-    return availableGuests;
+    return checkedoutGuests;
+}
+
+List<Guest> GetCheckedinGuests(List<Guest> g)
+{
+    List<Guest> checkedinGuests = new List<Guest>();
+    foreach (Guest guest in g)
+    {
+        if (guest.IsCheckedin)
+            checkedinGuests.Add(guest);
+    }
+
+    return checkedinGuests;
 }
 
 int? ValidateIntInput(int lowerBound, int higherBound, bool offset, string prompt)
@@ -212,12 +224,12 @@ void ConfigureRoom(Room r)
 
 void CheckinGuest(List<Guest> g, List<Room> r)
 {
-    // Shows a list of available guests and prompts the user to select a guest to check-in
+    // Shows a list of checked-out guests and prompts the user to select a guest to check-in
     Guest? guest;
-    ListGuests(GetAvailableGuests(g));
+    ListGuests(GetCheckedoutGuests(g));
     while (true)
     {
-        var input = ValidateIntInput(0, GetAvailableGuests(g).Count - 1, true, $"Who is checking in? Enter 1 to {GetAvailableGuests(g).Count} inclusive: ");
+        var input = ValidateIntInput(0, GetCheckedoutGuests(g).Count - 1, true, $"Who is checking in? Enter 1 to {GetCheckedoutGuests(g).Count} inclusive: ");
         if (input != null)
         {
             guest = g[input.Value];
@@ -299,6 +311,50 @@ void CheckinGuest(List<Guest> g, List<Room> r)
 
     Console.WriteLine("\n========== Check-in successful ==========");
     Console.WriteLine($"Guest {guest.Name} has been checked in from {stay.CheckinDate.ToString("dd/MM/yyyy")} to {stay.CheckoutDate.ToString("dd/MM/yyyy")}. The following rooms will be occupied:");
+    foreach (Room room in stay.RoomList)
+    {
+        Console.WriteLine(room.ToString());
+    }
+}
+
+void ExtendStay(List<Guest> g)
+{
+    // Shows a list of checked-in guests and prompts the user to select a guest
+    Guest? guest;
+    ListGuests(GetCheckedinGuests(g));
+    while (true)
+    {
+        int? input = ValidateIntInput(0, GetCheckedinGuests(g).Count - 1, true,
+            $"Who would like to extend their stay? Enter 1 to {GetCheckedoutGuests(g).Count} inclusive: ");
+        if (input != null)
+        {
+            guest = GetCheckedinGuests(g)[input.Value];
+            break;
+        }
+    }
+
+    // Gets the stay information for the guest
+    Stay stay = guest.HotelStay;
+    DateTime checkoutDate = stay.CheckoutDate;
+    while (true)
+    {
+        int? input = ValidateIntInput(1, 7, false, $"How many days would you like to extend the stay for {guest.Name}? Enter 1 to 7 inclusive: ");
+        if (input != null)
+        {
+            DateTime newCheckoutDate = checkoutDate.AddDays(input.Value);
+            bool? confirm =
+                ValidateBooleanInput(
+                    $"{guest.Name} will now check-out on {newCheckoutDate.ToString("dd/MM/yyyy")}. Is this correct? (Y/N) ");
+            if (confirm != null && confirm == true)
+            {
+                stay.CheckoutDate = newCheckoutDate;
+                break;
+            }
+        }
+    }
+    
+    Console.WriteLine("\n========== Extension successful ==========");
+    Console.WriteLine($"Guest {guest.Name}'s stay has been extended to {stay.CheckoutDate.ToString("dd/MM/yyyy")}. The following rooms will be occupied:");
     foreach (Room room in stay.RoomList)
     {
         Console.WriteLine(room.ToString());
