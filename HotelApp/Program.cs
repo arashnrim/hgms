@@ -112,8 +112,7 @@ int? ValidateIntInput(int lowerBound, int higherBound, bool offset, string promp
         int input = Convert.ToInt32(Console.ReadLine()) - (offset ? 1 : 0);
         if (input >= lowerBound && input <= higherBound)
             return input;
-        else
-            throw new ArgumentOutOfRangeException(nameof(input));
+        throw new ArgumentOutOfRangeException(nameof(input));
     }
     catch (FormatException)
     {
@@ -122,7 +121,7 @@ int? ValidateIntInput(int lowerBound, int higherBound, bool offset, string promp
     }
     catch (ArgumentOutOfRangeException)
     {
-        Console.WriteLine($"Input should be between {lowerBound} and {higherBound} inclusive.");
+        Console.WriteLine($"Input should be between {lowerBound + (offset ? 1 : 0)} and {higherBound + (offset ? 1 : 0)} inclusive.");
         return null;
     }
 }
@@ -218,7 +217,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     ListGuests(GetAvailableGuests(g));
     while (true)
     {
-        var input = ValidateIntInput(0, GetAvailableGuests(g).Count, true, $"Who is checking in? Enter 1 to {GetAvailableGuests(g).Count} inclusive: ");
+        var input = ValidateIntInput(0, GetAvailableGuests(g).Count - 1, true, $"Who is checking in? Enter 1 to {GetAvailableGuests(g).Count} inclusive: ");
         if (input != null)
         {
             guest = g[input.Value];
@@ -261,7 +260,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
 
         while (true)
         {
-            var input = ValidateIntInput(0, availableRooms.Count, true,
+            var input = ValidateIntInput(0, availableRooms.Count - 1, true,
                 $"Which room is {guest.Name} staying in? Enter 1 to {availableRooms.Count} inclusive: ");
             if (input != null)
             {
