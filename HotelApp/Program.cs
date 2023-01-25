@@ -249,8 +249,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     }
 
     // Creates a new Stay object based on the provided information
-    List<Room> stayRooms = new List<Room>();
-    Stay stay = new Stay(checkinDate.Value, checkoutDate.Value, rooms);
+    Stay stay = new Stay(checkinDate.Value, checkoutDate.Value);
 
     // Lists the available rooms and prompts the user to select a room
     bool repeat = true;
@@ -273,13 +272,13 @@ void CheckinGuest(List<Guest> g, List<Room> r)
 
                 ConfigureRoom(bookedRoom);
 
-                stayRooms.Add(availableRooms[input.Value]);
+                stay.AddRoom(availableRooms[input.Value]);
                 break;
             }
         }
 
         // Currently manually hard-coded restricted to 2 rooms per stay. Edit here if necessary.
-        if (stayRooms.Count < 2)
+        if (stay.RoomList.Count < 2)
         {
             while (true)
             {
@@ -301,7 +300,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
 
     Console.WriteLine("\n========== Check-in successful ==========");
     Console.WriteLine($"Guest {guest.Name} has been checked in from {stay.CheckinDate.ToString("dd/MM/yyyy")} to {stay.CheckoutDate.ToString("dd/MM/yyyy")}. The following rooms will be occupied:");
-    foreach (Room room in stayRooms)
+    foreach (Room room in stay.RoomList)
     {
         Console.WriteLine(room.ToString());
     }
@@ -391,7 +390,6 @@ void InitializeGuests(List<Guest> g, List<Room> r)
             using (StreamReader staySR = new StreamReader("Stays.csv"))
             {
                 string? stayLine = staySR.ReadLine();
-                List<Room> stayRooms = new List<Room>();
 
                 while ((stayLine = staySR.ReadLine()) != null)
                 {
@@ -401,17 +399,19 @@ void InitializeGuests(List<Guest> g, List<Room> r)
                     if (stayData[1] != data[1])
                         continue;
 
-                    // Creates a list of rooms that the guest has stayed in
+                    // Initializes the stay object
+                    stay = new Stay(Convert.ToDateTime(stayData[3]), Convert.ToDateTime(stayData[4]));
+
+                    // Adds the room that the guest has for a particular stay
                     Room? room1 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[5]));
-                    InitializeRoom(stayRooms, room1, guest, stayData[2], new []{stayData[6], stayData[7], stayData[8]}, true);
+                    InitializeRoom(stay.RoomList, room1, guest, stayData[2], new []{stayData[6], stayData[7], stayData[8]}, true);
 
                     if (stayData[9] != "")
                     {
                         Room? room2 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[9]));
-                        InitializeRoom(stayRooms, room2, guest, stayData[2], new []{stayData[10], stayData[11], stayData[12]}, true);
+                        InitializeRoom(stay.RoomList, room2, guest, stayData[2],
+                            new[] { stayData[10], stayData[11], stayData[12] }, true);
                     }
-
-                    stay = new Stay(Convert.ToDateTime(stayData[3]), Convert.ToDateTime(stayData[4]), stayRooms);
                 }
             }
 
