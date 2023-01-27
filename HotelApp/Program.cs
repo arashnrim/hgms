@@ -1,5 +1,4 @@
 ﻿using HotelApp;
-using System.Collections.Generic;
 
 List<Room> rooms = new List<Room>();
 List<Guest> guests = new List<Guest>();
@@ -38,6 +37,9 @@ while (cont)
         case "6":
             ExtendStay(guests);
             break;
+        case "7":
+            ShowRevenueBreakdown(guests);
+            break;
         case "0":
             cont = false;
             break;
@@ -57,7 +59,7 @@ void DisplayMenu()
 {
     Console.WriteLine("========== ICT Hotel Guest Management System ==========");
 
-    string[] options = new string[] { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Show stay details for a guest", "Extend a guest's stay" };
+    string[] options = { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year" };
     for (int i = 0; i < options.Length; i++)
         Console.WriteLine($"[{i + 1}] {options[i]}");
     Console.WriteLine("[0] Exit");
@@ -359,6 +361,45 @@ void ExtendStay(List<Guest> g)
     {
         Console.WriteLine(room.ToString());
     }
+}
+
+void ShowRevenueBreakdown(List<Guest> g)
+{
+    int currentYear = DateTime.Today.Year;
+    int selectedYear;
+    while (true)
+    {
+        // Additional assumption: the hotel began operations from 2000 onwards, meaning that values before 2000 are invalid.
+        int? input = ValidateIntInput(2000, currentYear + 1, false, "Enter the year: ");
+        if (input != null)
+        {
+            selectedYear = input.Value;
+            break;
+        }
+    }
+
+    double[] breakdown = new double[12];
+    
+    // Loops through each Guest and their Stay object and adds the information to the breakdown if the years match
+    foreach (Guest guest in g)
+    {
+        if (guest.HotelStay.CheckoutDate.Year != selectedYear)
+            continue;
+
+        DateTime checkoutDate = guest.HotelStay.CheckoutDate;
+        double revenue = guest.HotelStay.CalculateTotal();
+        breakdown[checkoutDate.Month - 1] += revenue;
+    }
+
+    Console.WriteLine();
+    string[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    for (int i = 0; i < months.Length; i++)
+    {
+        Console.WriteLine($"{months[i]} {selectedYear}:\t${breakdown[i].ToString("0.00")}");
+    }
+
+    double total = breakdown.Sum();
+    Console.WriteLine($"\nTotal:\t\t${total.ToString("0.00")}");
 }
 
 //==========================================================
