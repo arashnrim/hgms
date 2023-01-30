@@ -582,7 +582,11 @@ void guest_reg()
         //Add guest to the Guest CSV file
         using (StreamWriter sr = new StreamWriter("Guests.csv", false))
         {
-            sr.WriteLine("{0,0},{1,0},{2,0},{3,0}", name, p_number, "Ordinary", 0);
+            sr.WriteLine("Name, PassportNumber, MembershipStatus, MembershipPoints");
+            foreach (Guest g in guests)
+            {
+                sr.WriteLine("{0,0},{1,0},{2,0},{3,0}",g.Name,g.PassportNum,g.Member.Status,g.Member.Points);
+            }
         }
     }
 }
@@ -590,22 +594,29 @@ void guest_reg()
 
 void guest_details()
 {
+    //Creates a variable//
     int i = 1;
+    // Prompts the user for the Guest to view//
     Console.WriteLine("Select a Guest to View:");
+    //Display the guest with number options using the variable created before as number indicator//
     foreach(Guest g in guests)
     {
         Console.WriteLine("{0,0}. {1,0}",i, g.Name);
         i += 1;
     }
-    Console.Write("Your Choice?");
-    int choice = Convert.ToInt32(Console.ReadLine());
-    if(choice > guests.Count)
+    //Check if the option selected is valid if not retry//
+    int? user_choice = ValidateIntInput(1, guests.Count, true, "Your Choice?");
+    if(user_choice > guests.Count)
     {
         Console.WriteLine("Please enter a valid option");
         guest_details();
     }
-
-    Console.WriteLine(guests[choice - 1].ToString());
+    else if (user_choice == null)
+    {
+        guest_details();
+    }
+    int choice = Convert.ToInt32(user_choice);
+    //Creates a table for the selected option//
     Console.WriteLine(
         "---------------------------------------------------------------------------------------------------------------------------\n" +
         "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-15}|{5,-17}|{6,-15}|{7,-10}|\n" +
