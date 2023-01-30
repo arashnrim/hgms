@@ -14,16 +14,13 @@ namespace HotelApp
     /// </summary>
     internal class Membership
     {
-        private string status;
         public string Status { get; set; }
 
         private int points;
-        public int Points { 
-            get { return points; } 
-            set {
-                if (value < 0) points = 0;
-                else points = value;
-            }
+        public int Points
+        {
+            get => points;
+            set => points = value < 0 ? 0 : value;
         }
 
         /// <summary>
@@ -69,9 +66,7 @@ namespace HotelApp
         public bool RedeemPoints(int amount)
         {
             if (Status != "Silver" && Status != "Gold")
-            {
                 return false;
-            }
 
             Points -= amount;
             return true;

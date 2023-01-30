@@ -13,19 +13,14 @@ namespace HotelApp
     /// </summary>
     internal class Guest
     {
-        private string name;
         public string Name { get; set; }
-
-        private string passportNum;
+        
         public string PassportNum { get; set; }
-
-        private Stay hotelStay;
+        
         public Stay HotelStay { get; set; }
 
-        private Membership member;
         public Membership Member { get; set; }
-
-        private bool isCheckedin;
+        
         public bool IsCheckedin { get; set; }
 
         /// <summary>
@@ -50,7 +45,7 @@ namespace HotelApp
 
         public override string ToString()
         {
-            return $"Name: {Name}, Passport number: {PassportNum}, Stay information: {HotelStay.ToString()}, Membership information: {Member.ToString()}, Checked in: {(IsCheckedin ? "Yes" : "No")}";
+            return $"Name: {Name}, Passport number: {PassportNum}, Stay information: {HotelStay}, Membership information: {Member}, Checked in: {(IsCheckedin ? "Yes" : "No")}";
         }
     }
 }

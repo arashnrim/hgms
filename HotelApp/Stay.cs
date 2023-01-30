@@ -14,13 +14,10 @@ namespace HotelApp
     /// </summary>
     internal class Stay
     {
-        private DateTime checkinDate;
         public DateTime CheckinDate { get; set; }
 
-        private DateTime checkoutDate;
         public DateTime CheckoutDate { get; set; }
-
-        private List<Room> roomList;
+        
         public List<Room> RoomList { get; set; }
 
         /// <summary>
@@ -67,7 +64,7 @@ namespace HotelApp
 
         public override string ToString()
         {
-            return $"Checkin date: {CheckinDate.ToString("dd/MM/yyyy")}, Checkout date: {CheckoutDate.ToString("dd/MM/yyyy")}, Number of rooms {RoomList.Count}";
+            return $"Checkin date: {CheckinDate:dd/MM/yyyy}, Checkout date: {CheckoutDate:dd/MM/yyyy}, Number of rooms {RoomList.Count}";
         }
     }
 }

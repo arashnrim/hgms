@@ -14,12 +14,7 @@ namespace HotelApp
     /// </summary>
     internal class DeluxeRoom : Room
     {
-        private bool additionalBed;
-        public bool AdditionalBed
-        {
-            get { return additionalBed; } 
-            set { additionalBed = value; }
-        }
+        public bool AdditionalBed { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeluxeRoom"/> class.
@@ -43,24 +38,20 @@ namespace HotelApp
 
         public override double CalculateCharges()
         {
-            double Daily_Rate = 0;
-            if (AdditionalBed == true)
+            double dailyRate = 0;
+            if (AdditionalBed) dailyRate += 25;
+
+            switch (BedConfiguration)
             {
-                Daily_Rate += 25;
+                case "Twin":
+                    dailyRate += 140;
+                    break;
+                case "Triple":
+                    dailyRate += 210;
+                    break;
             }
 
-
-            if (BedConfiguration == "Twin")
-            {
-                Daily_Rate += 140;
-            }
-            else if (BedConfiguration == "Triple")
-            {
-                Daily_Rate += 210;
-            }
-
-
-            return Daily_Rate;
+            return dailyRate;
         }
         public override string ToString()
         {

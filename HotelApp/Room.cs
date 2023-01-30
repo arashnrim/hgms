@@ -15,33 +15,13 @@ namespace HotelApp
     /// </summary>
     internal abstract class Room
     {
-        private int roomNumber;
-        public int RoomNumber { 
-            get { return roomNumber; }
-            set { roomNumber = value; } 
-        }
+        public int RoomNumber { get; set; }
 
-        private string bedConfiguration;
-        public string BedConfiguration
-        { 
-            get { return bedConfiguration; }
-            set { bedConfiguration = value; }
-        }
+        public string BedConfiguration { get; set; }
 
-        private double dailyRate;
-        public double DailyRate
-        {
-            get { return dailyRate; }
-            set { dailyRate = value; }
-        }
+        public double DailyRate { get; set; }
 
-        private bool isAvail;
-        public bool IsAvail
-        {
-            get { return isAvail; }
-            set { isAvail = value; }
-
-        }
+        public bool IsAvail { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Room"/> class.
@@ -51,16 +31,16 @@ namespace HotelApp
         /// Initializes a new instance of the <see cref="Room"/> class with the room
         /// number, bed configuration, daily rate, and availability.
         /// </summary>
-        /// <param name="roomNum">The room number. It should be a unique value.</param>
-        /// <param name="bedconfig">The configuration of the beds in the room.</param>
-        /// <param name="dailyR">The daily cost of occupying the room.</param>
-        /// <param name="isavil">The availability of the room for check-in.</param>
-        public Room(int roomNum, string bedconfig, double dailyR, bool isavil)
+        /// <param name="rn">The room number. It should be a unique value.</param>
+        /// <param name="bc">The configuration of the beds in the room.</param>
+        /// <param name="dr">The daily cost of occupying the room.</param>
+        /// <param name="ia">The availability of the room for check-in.</param>
+        public Room(int rn, string bc, double dr, bool ia)
         {
-            RoomNumber = roomNum;
-            BedConfiguration = bedconfig;
-            DailyRate = dailyR;
-            IsAvail = isavil;
+            RoomNumber = rn;
+            BedConfiguration = bc;
+            DailyRate = dr;
+            IsAvail = ia;
         }
 
         /// <summary>
@@ -71,7 +51,7 @@ namespace HotelApp
 
         public override string ToString()
         {
-            return $"RoomNumber: {RoomNumber.ToString()}, BedConfiguration: {BedConfiguration}, DailyRate: {DailyRate.ToString()}, IsAvail: {IsAvail.ToString()}";
+            return $"RoomNumber: {RoomNumber}, BedConfiguration: {BedConfiguration}, DailyRate: {DailyRate}, IsAvail: {IsAvail}";
         }
     }
 }
