@@ -769,14 +769,23 @@ void checkoutguest()
             }
             else
             {   // Ask if the guest want to use their points
+                bool loop = true;
+                while (loop == true)
+                {
                 bool? verify = ValidateBooleanInput($"You have {temp_list[choice].Member.Points} points to redeem. Do you want to redeem your points? (Y/N) ");
-                if (verify is not true)
+                // Loop if any other answer is given
+                if (verify is null)
+                    {
+
+                    }
+                
+                else if (verify is not true)
                 {
                     Console.WriteLine($"You will not use your points");
                     Console.Write("Please enter any key to make payment: ");
                     //This readline is soley for they guest to key random stuff in and will not be recorded
                     Console.ReadLine();
-                    break;
+                    loop = false;
                 }
                 else if (verify is true)
                 {
@@ -797,7 +806,10 @@ void checkoutguest()
                     temp_list[choice].Member.RedeemPoints(points_to_redeem);
                     total_cost -= points_to_redeem;
                     break;
+                    }
+                    loop = false;
                 }
+                break;
             }
         }
         temp_list[choice].Member.EarnPoints(total_cost);
