@@ -1,6 +1,7 @@
 ﻿using HotelApp;
 using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
+using System.Xml.Schema;
 
 List<Room> rooms = new List<Room>();
 List<Guest> guests = new List<Guest>();
@@ -32,13 +33,16 @@ while (cont)
             CheckinGuest(guests, rooms);
             break;
         case "5":
+            checkoutguest();
+            break;
+        case "6":
             // TODO: Show stay details for a guest
             guest_details();
             break;
-        case "6":
+        case "7":
             ExtendStay(guests);
             break;
-        case "7":
+        case "8":
             ShowRevenueBreakdown(guests);
             break;
         case "0":
@@ -60,7 +64,7 @@ void DisplayMenu()
 {
     Console.WriteLine("========== ICT Hotel Guest Management System ==========");
 
-    string[] options = { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year" };
+    string[] options = { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest","Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year" };
     for (int i = 0; i < options.Length; i++)
         Console.WriteLine($"[{i + 1}] {options[i]}");
     Console.WriteLine("[0] Exit");
@@ -537,21 +541,37 @@ void guest_reg()
     // Prompts the user for the guest name  
     Console.Write("Guest's name:");
     string name = Console.ReadLine();
-
+    if (name == "")
+    {
+        Console.WriteLine("Please input a name");
+        guest_reg();
+    }
+    string p_number;
     //Prompts the user for the guest's passport number
-    Console.Write("Guest's passport number:");
-    string p_number = Console.ReadLine();
+    while (true)
+    {
+        Console.Write("Guest's passport number:");
+        p_number = Console.ReadLine();
+        if (p_number != "")
+        {
+            break; 
+        }
+        Console.WriteLine("Please input a passport number");
+    }
+    
     //To check if user is already registered//
     bool already_registered = false;
     foreach (Guest g in guests)
     {
-        if (p_number == g.PassportNum)
-        {
-            Console.WriteLine("Guest is already registered");
-            already_registered = true;
-            break;
-        }
+    if (p_number == g.PassportNum)
+    {
+        Console.WriteLine("Guest is already registered");
+        already_registered = true;
+        break;
     }
+        
+}
+    
     //Exit if the guest is already registered//
     if (already_registered == false)
     {
@@ -574,35 +594,251 @@ void guest_reg()
 void guest_details()
 {
     //Creates a variable//
-    int i = 1;
+    
+    int choice;
     // Prompts the user for the Guest to view//
-    Console.WriteLine("Select a Guest to View:");
-    //Display the guest with number options using the variable created before as number indicator//
-    foreach(Guest g in guests)
-    {
-        Console.WriteLine("{0,0}. {1,0}",i, g.Name);
-        i += 1;
+    while (true) {
+        int i = 1;
+        Console.WriteLine("Select a Guest to View:");
+        //Display the guest with number options using the variable created before as number indicator//
+        foreach(Guest g in guests)
+        {
+            Console.WriteLine("{0,0}. {1,0}",i, g.Name);
+            i += 1;
+        }
+        //Check if the option selected is valid if not retry//
+        int? user_choice = ValidateIntInput(0, guests.Count(), true, "Your Choice?");
+        choice = Convert.ToInt32(user_choice);
+        if (choice >= guests.Count())
+        {
+            Console.WriteLine("Please enter a valid option");
+        }
+        else if (choice < 1)
+        {
+
+        }
+        else
+        {
+            break;
+        }
     }
-    //Check if the option selected is valid if not retry//
-    int? user_choice = ValidateIntInput(1, guests.Count, true, "Your Choice?");
-    if(user_choice > guests.Count)
-    {
-        Console.WriteLine("Please enter a valid option");
-        guest_details();
-    }
-    else if (user_choice == null)
-    {
-        guest_details();
-    }
-    int choice = Convert.ToInt32(user_choice);
+        
     //Creates a table for the selected option//
     Console.WriteLine(
-        "---------------------------------------------------------------------------------------------------------------------------\n" +
-        "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-15}|{5,-17}|{6,-15}|{7,-10}|\n" +
-        "---------------------------------------------------------------------------------------------------------------------------\n" +
-        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-15}|{13,-17}|{14,-15}|{15,-10}|\n"+
-        "---------------------------------------------------------------------------------------------------------------------------\n"
-        ,"Name","Passport Number","Checkin Date","Checkout Date","Number of rooms","Membership Status","Current points","Checked in",
+        "----------------------------------------------------------------------------------------------------------------------------\n" +
+        "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
+        "----------------------------------------------------------------------------------------------------------------------------\n" +
+        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n"+
+        "----------------------------------------------------------------------------------------------------------------------------"
+        , "Name","Passport Number","Checkin Date","Checkout Date","Number of rooms","Membership Status","Current points","Checked in",
         guests[choice].Name, guests[choice].PassportNum, guests[choice].HotelStay.CheckinDate.ToString("dd/mm/yyyy"), guests[choice].HotelStay.CheckoutDate.ToString("dd/mm/yyyy"),
         guests[choice].HotelStay.RoomList.Count, guests[choice].Member.Status, guests[choice].Member.Points, guests[choice].IsCheckedin);
+    foreach (Room r in guests[choice].HotelStay.RoomList)
+    {
+        if (r.GetType() == typeof(StandardRoom)) 
+        {
+            StandardRoom s = (StandardRoom)r;
+            Console.WriteLine(
+                        "----------------------------------------------------------------------------------------------------------------------------\n" +
+                        "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
+                        "----------------------------------------------------------------------------------------------------------------------------\n" +
+                        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
+                        "----------------------------------------------------------------------------------------------------------------------------"
+                        ,"Room Number","Bed Configuration","Daily Rate","RequireWifi","RequireBreakfast","","",""
+                        ,s.RoomNumber,s.BedConfiguration,s.DailyRate,s.RequireWifi,s.RequireBreakfast,"","","");
+        }
+        else if (r.GetType() == typeof(DeluxeRoom))
+        {
+            DeluxeRoom s = (DeluxeRoom)r;
+            Console.WriteLine(
+                        "---------------------------------------------------------------------------------------------------------------------------\n" +
+                        "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
+                        "---------------------------------------------------------------------------------------------------------------------------\n" +
+                        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
+                        "---------------------------------------------------------------------------------------------------------------------------\n"
+                        , "Room Number", "Bed Configuration", "Daily Rate", "AdditionalBed", "", "", "", ""
+                        , s.RoomNumber, s.BedConfiguration, s.DailyRate, s.AdditionalBed,"", "", "", "");
+        }
+       
+    }
+    
+}
+
+
+void checkoutguest()
+{
+    //Creates a variable//
+    int num = 1;
+    int num_of_people_not_checked_in = 0;
+    // Prompts the user for the Guest to Checkout//
+    Console.WriteLine("Select a Guest to Checkout:");
+    //Display the guest with number options using the variable created before as number indicator//
+    //Create a temporary list to store people who have checked in
+    List<Guest> temp_list = new List<Guest>();
+
+    //Only people who are checked in will be displayed//
+    foreach (Guest g in guests)
+    {
+        
+        if (g.IsCheckedin == true)
+        {   //There is a chance of 2 guest having the same name but the passport num is unique
+            Console.WriteLine("{0,0}. {1,0}  Passport Num: {2,0}", num, g.Name,g.PassportNum);
+            num += 1;
+            temp_list.Add(g);
+        }
+        else
+        {
+            num_of_people_not_checked_in += 1;
+        }
+    }
+    if (num_of_people_not_checked_in == guests.Count)
+    {
+        Console.WriteLine("There are currently No one checked in");
+    }
+    else
+    {
+        //Check if the option selected is valid if not retry//
+        int? user_choice = ValidateIntInput(0, guests.Count, true, "Your Choice?");
+        if (user_choice > guests.Count)
+        {
+            Console.WriteLine("Please enter a valid option");
+            guest_details();
+        }
+        else if (user_choice == null)
+        {
+            guest_details();
+        }
+        int choice = Convert.ToInt32(user_choice);
+        
+        // Add 1 to the total days_stayed as calculate the date diff
+        int days_stayed = temp_list[choice].HotelStay.CheckoutDate.Subtract(temp_list[choice].HotelStay.CheckinDate).Days + 1;
+        // Cost will be tallied here
+        double total_cost = 0;
+
+        Console.WriteLine(
+                "======================================\n" +
+                "|         HOTEL       BILL           |\n" +
+                "======================================");
+        foreach (Room r in temp_list[choice].HotelStay.RoomList)
+        {
+            if (r.GetType() == typeof(StandardRoom))
+            {
+                StandardRoom s_room = (StandardRoom)r;
+                total_cost += s_room.CalculateCharges()*days_stayed;
+                    Console.WriteLine(
+                        "|Room Number: {0,-23}|\n" +
+                        "|Room Type: {1,-25}|\n" +
+                        "|Bed Configureation: {2,-16}|\n" +
+                        "|Days Stayed: {3,-23}|\n" +
+                        "|Wi-Fi $10 Added: {4,-19}|\n" +
+                        "|Breakfast $20 Added: {5,-15}|\n" +
+                        "|Daily Rate: ${6,-23}|\n" +
+                        "|Cost : ${7,-28}|\n" +
+                        "======================================"
+                        , r.RoomNumber, "Standard Room",s_room.BedConfiguration,days_stayed, s_room.RequireWifi, s_room.RequireBreakfast,s_room.CalculateCharges().ToString("0.00"),(r.CalculateCharges()*days_stayed).ToString("0.00"));
+            }
+            else if (r.GetType() == typeof(DeluxeRoom))
+                {
+                    DeluxeRoom s_room = (DeluxeRoom)r;
+                    total_cost += s_room.CalculateCharges() * days_stayed;
+                    Console.WriteLine(
+                        "|Room Number: {0,-23}|\n" +
+                        "|Room Type: {1,-25}|\n" +
+                        "|Bed Configuration: {2,-17}|\n" +
+                        "|Days Stayed: {3,-23}|\n" +
+                        "|Additional Bed $25: {4,-16}|\n" +
+                        "|Daily Rate: ${5,-23}|\n" +
+                        "|Cost : ${6,-28}|\n" +
+                        "======================================"
+                        , r.RoomNumber, "Deluxe Room",s_room.BedConfiguration, days_stayed,s_room.AdditionalBed, s_room.CalculateCharges().ToString("0.00"),  (s_room.CalculateCharges() * days_stayed).ToString("0.00"));
+            }
+            
+        }
+        Console.WriteLine(
+            "|Total Bill: ${0,-23}|\n" +
+            "" +
+            "======================================"
+            , total_cost.ToString("0.00"));
+        
+        while (true)
+        {   // check if the user is eligible for the points system
+            if (temp_list[choice].Member.Status != "Silver" && temp_list[choice].Member.Status != "Gold")
+            {
+                Console.WriteLine("You are not eligible to redeem points as your membership status is below Silver");
+                break;
+            }
+            else
+            {   // Ask if the guest want to use their points
+                bool? verify = ValidateBooleanInput($"You have {temp_list[choice].Member.Points} points to redeem. Do you want to redeem your points? (Y/N) ");
+                if (verify is not true)
+                {
+                    Console.WriteLine($"You will not use your points");
+                    Console.Write("Please enter any key to make payment: ");
+                    //This readline is soley for they guest to key random stuff in and will not be recorded
+                    Console.ReadLine();
+                    break;
+                }
+                else if (verify is true)
+                {
+                    int points_to_redeem = 0;
+                    while (true)
+                    {
+                    int? use_points = ValidateIntInput(0, temp_list[choice].Member.Points, false, $"You have {temp_list[choice].Member.Points} points, how many do you want to redeem?");
+                    if (use_points >= 0 && use_points <= temp_list[choice].Member.Points)
+                        {
+                            points_to_redeem = Convert.ToInt32(use_points);
+                            break;
+                        }
+                    }
+                    Console.Write("Please enter any key to make payment: ");
+                    //This readline is soley for they guest to key random stuff in and will not be recorded
+                    Console.ReadLine();
+                    Console.WriteLine($"Your redeemed {points_to_redeem} out of {temp_list[choice].Member.Points} points ");
+                    temp_list[choice].Member.RedeemPoints(points_to_redeem);
+                    total_cost -= points_to_redeem;
+                    break;
+                }
+            }
+        }
+        temp_list[choice].Member.EarnPoints(total_cost);
+        Console.WriteLine($"Your earn {(total_cost/10).ToString("0")} points and currently have {temp_list[choice].Member.Points} points.");
+        // This is to offically check out the guest
+        foreach(Guest g in guests)
+        {
+            if (g.PassportNum == temp_list[choice].PassportNum)
+            {
+                g.IsCheckedin= false;
+                g.Member.Points = temp_list[choice].Member.Points;
+                if (g.Member.Status == "Gold")
+                {
+
+                }
+                else if (g.Member.Status == "Sliver")
+                    {
+                        if (g.Member.Points >= 200)
+                        {
+                            g.Member.Status = "Gold";
+                            Console.WriteLine("Congrats! You are now a Gold Member!");
+                        }
+                    break;
+                    }
+                else if (g.Member.Status == "Ordinary")
+                {
+                    if (g.Member.Points >= 200)
+                    {
+                        g.Member.Status = "Gold";
+                        Console.WriteLine("Congrats! You are now a Gold Member!");
+                    }
+                    else if (g.Member.Points >= 100)
+                    {
+                        g.Member.Status = "Silver";
+                        Console.WriteLine("Congrats! You are now a Silver Member!");
+                    }
+                }
+            }
+        }
+    }
+    
+    
+   
 }

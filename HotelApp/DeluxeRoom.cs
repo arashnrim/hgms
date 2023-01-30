@@ -55,7 +55,7 @@ namespace HotelApp
         }
         public override string ToString()
         {
-            return base.ToString() + $"AdditionalBed: {AdditionalBed}";
+            return base.ToString() + $" AdditionalBed: {AdditionalBed}";
         }
     }
 }
