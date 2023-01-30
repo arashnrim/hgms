@@ -607,11 +607,12 @@ void guest_details()
 
     Console.WriteLine(guests[choice - 1].ToString());
     Console.WriteLine(
-        "-------------------------------------\n" +
-        "|{0,-18}|{1,-18}|{2,-18}|{3,-18}|{4,-18}|{5,-18}|{6,-18}|{7,-18}|\n" +
-        "|{8,-18}|{9,-18}|{10,-18}|{11,-18}|{12,-18}|{13,-18}|{14,-18}|{15,-18}|\n"+
-        "-----------------------------------------\n" +
-        "|","Name","Passport Number","Checkin Date","Checkout Date","Number of rooms","Membership Status","Current points","Checked in",
-        guests[choice].Name, guests[choice].PassportNum, guests[choice].HotelStay.CheckinDate, guests[choice].HotelStay.CheckoutDate,
-        guests[choice].HotelStay.RoomList);
+        "---------------------------------------------------------------------------------------------------------------------------\n" +
+        "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-15}|{5,-17}|{6,-15}|{7,-10}|\n" +
+        "---------------------------------------------------------------------------------------------------------------------------\n" +
+        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-15}|{13,-17}|{14,-15}|{15,-10}|\n"+
+        "---------------------------------------------------------------------------------------------------------------------------\n"
+        ,"Name","Passport Number","Checkin Date","Checkout Date","Number of rooms","Membership Status","Current points","Checked in",
+        guests[choice].Name, guests[choice].PassportNum, guests[choice].HotelStay.CheckinDate.ToString("dd/mm/yyyy"), guests[choice].HotelStay.CheckoutDate.ToString("dd/mm/yyyy"),
+        guests[choice].HotelStay.RoomList.Count, guests[choice].Member.Status, guests[choice].Member.Points, guests[choice].IsCheckedin);
 }
