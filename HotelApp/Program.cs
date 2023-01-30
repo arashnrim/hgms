@@ -515,15 +515,11 @@ void InitializeGuests(List<Guest> g, List<Room> r)
             Membership membership = new Membership(data[2], Convert.ToInt32(data[3]));
 
             // Creates a guest object
-            if (stay != null)
-            {
-                guest.Name = data[0];
-                guest.PassportNum = data[1];
-                guest.HotelStay = stay;
-                guest.Member = membership;
-                g.Add(guest);
-            } else
-                throw new Exception("Stay data may be wrongly formatted.");
+            guest.Name = data[0];
+            guest.PassportNum = data[1];
+            guest.Member = membership;
+            guest.HotelStay = stay ?? new Stay();
+            g.Add(guest);
         }
     }
 }
