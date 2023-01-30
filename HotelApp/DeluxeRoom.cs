@@ -64,7 +64,7 @@ namespace HotelApp
         }
         public override string ToString()
         {
-            return $"RoomNumber: {RoomNumber.ToString()}, BedConfiguration: {BedConfiguration}, DailyRate: {DailyRate.ToString()}, IsAvail: {IsAvail.ToString()}, AdditionalBed: {AdditionalBed}";
+            return base.ToString() + $"AdditionalBed: {AdditionalBed}";
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using HotelApp;
+using System.Data.SqlTypes;
+using System.Diagnostics.CodeAnalysis;
 
 List<Room> rooms = new List<Room>();
 List<Guest> guests = new List<Guest>();
@@ -33,6 +35,7 @@ while (cont)
             break;
         case "5":
             // TODO: Show stay details for a guest
+            guest_details();
             break;
         case "6":
             ExtendStay(guests);
@@ -559,10 +562,56 @@ void guest_reg()
     //Prompts the user for the guest's passport number
     Console.Write("Guest's passport number:");
     string p_number = Console.ReadLine();
+    //To check if user is already registered//
+    bool already_registered = false;
+    foreach (Guest g in guests)
+    {
+        if (p_number == g.PassportNum)
+        {
+            Console.WriteLine("Guest is already registered");
+            already_registered = true;
+            break;
+        }
+    }
+    //Exit if the guest is already registered//
+    if (already_registered == false)
+    {
+        //Creates a new guest object and adds to the guest list
+        guests.Add(new Guest(name, p_number, new Stay(), new Membership("Ordinary", 0)));
 
-    //Creates a new guest object and adds to the guest list
-    guests.Add(new Guest(name, p_number,new Stay(),new Membership("Ordinary",0)));
+        //Add guest to the Guest CSV file
+        using (StreamWriter sr = new StreamWriter("Guests.csv", false))
+        {
+            sr.WriteLine("{0,0},{1,0},{2,0},{3,0}", name, p_number, "Ordinary", 0);
+        }
+    }
+}
 
-    //Add guest to the Guest CSV file
-    
+
+void guest_details()
+{
+    int i = 1;
+    Console.WriteLine("Select a Guest to View:");
+    foreach(Guest g in guests)
+    {
+        Console.WriteLine("{0,0}. {1,0}",i, g.Name);
+        i += 1;
+    }
+    Console.Write("Your Choice?");
+    int choice = Convert.ToInt32(Console.ReadLine());
+    if(choice > guests.Count)
+    {
+        Console.WriteLine("Please enter a valid option");
+        guest_details();
+    }
+
+    Console.WriteLine(guests[choice - 1].ToString());
+    Console.WriteLine(
+        "-------------------------------------\n" +
+        "|{0,-18}|{1,-18}|{2,-18}|{3,-18}|{4,-18}|{5,-18}|{6,-18}|{7,-18}|\n" +
+        "|{8,-18}|{9,-18}|{10,-18}|{11,-18}|{12,-18}|{13,-18}|{14,-18}|{15,-18}|\n"+
+        "-----------------------------------------\n" +
+        "|","Name","Passport Number","Checkin Date","Checkout Date","Number of rooms","Membership Status","Current points","Checked in",
+        guests[choice].Name, guests[choice].PassportNum, guests[choice].HotelStay.CheckinDate, guests[choice].HotelStay.CheckoutDate,
+        guests[choice].HotelStay.RoomList);
 }
