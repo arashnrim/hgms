@@ -534,7 +534,7 @@ void guestlist()
 
 void guest_reg()
 {
-    // Prompts the user for the guest name
+    // Prompts the user for the guest name  
     Console.Write("Guest's name:");
     string name = Console.ReadLine();
 

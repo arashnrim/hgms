@@ -61,7 +61,7 @@ namespace HotelApp
 
         public override string ToString()
         {
-            return base.ToString() + $"RequireWifi: {RequireWifi.ToString()}, RequireBreakfast: {requireBreakfast.ToString()}";
+            return base.ToString() + $"RequireWifi: {RequireWifi.ToString()}, RequireBreakfast: {RequireBreakfast.ToString()}";
         }
     }
 }
