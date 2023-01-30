@@ -18,14 +18,12 @@ while (cont)
     switch (choice)
     {
         case "1":
-            // TODO: List all guests
             guestlist();
             break;
         case "2":
             ListAvailableRooms(rooms);
             break;
         case "3":
-            // TODO: Register a new guest
             guest_reg();
             break;
         case "4":
@@ -147,12 +145,10 @@ DateTime? ValidateDateTimeInput(string format, string prompt, DateTime? compareD
     {
         DateTime input =
             DateTime.ParseExact(Console.ReadLine(), format, System.Globalization.CultureInfo.InvariantCulture);
-        if (compareDate != null)
-        {
-            int difference = input.Subtract(compareDate.Value).Days;
-            if (difference < 0)
-                throw new ArgumentOutOfRangeException(nameof(input), "The given date is before the previous date.");
-        }
+        if (compareDate == null) return input;
+        int difference = input.Subtract(compareDate.Value).Days;
+        if (difference < 0)
+            throw new ArgumentOutOfRangeException(nameof(input), "The given date is before the previous date.");
 
         return input;
     }
@@ -190,13 +186,13 @@ bool? ValidateBooleanInput(string prompt)
 // an additional bed is required.
 void ConfigureRoom(Room r)
 {
-    string[] options = new string[] { "Wi-Fi", "breakfast", "an additional bed" };
+    string[] options = { "Wi-Fi", "breakfast", "an additional bed" };
     foreach (string option in options)
     {
         // Specifically blacklists the options based on what is allowed for each room type
         if (r is StandardRoom && option == "an additional bed")
             continue;
-        if (r is DeluxeRoom && (option == "Wi-Fi" || option == "breakfast"))
+        if (r is DeluxeRoom && option is "Wi-Fi" or "breakfast")
             continue;
 
         // Prompts the user and configures the room
@@ -291,17 +287,12 @@ void CheckinGuest(List<Guest> g, List<Room> r)
         }
 
         // Currently manually hard-coded restricted to 2 rooms per stay. Edit here if necessary.
-        if (stay.RoomList.Count < 2)
+        while (true)
         {
-            while (true)
-            {
-                var input = ValidateBooleanInput("Add another room? (Y/N) ");
-                if (input != null)
-                {
-                    repeat = input.Value;
-                    break;
-                }
-            }
+            var input = ValidateBooleanInput("Add another room? (Y/N) ");
+            if (input == null) continue;
+            repeat = input.Value;
+            break;
         }
     } while (repeat);
 
