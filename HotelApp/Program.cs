@@ -692,12 +692,19 @@ void checkoutguest()
                             break;
                         }
                     }
+                    total_cost -= points_to_redeem;
+                    Console.WriteLine(
+                            "======================================\n" +
+                            "|Total Bill: {0,24}|\n" +
+                            "" +
+                            "======================================"
+                            , total_cost.ToString("$0.00"));
                     Console.Write("Please enter any key to make payment: ");
                     //This readline is soley for they guest to key random stuff in and will not be recorded
                     Console.ReadLine();
                     Console.WriteLine($"Your redeemed {points_to_redeem} out of {temp_list[choice].Member.Points} points ");
                     temp_list[choice].Member.RedeemPoints(points_to_redeem);
-                    total_cost -= points_to_redeem;
+                    
                     break;
                     }
                     loop = false;
