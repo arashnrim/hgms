@@ -479,6 +479,7 @@ void guest_details()
     displayguestdeatils(choice);
 }
 
+// This method is created as there is more than one use of the table
 void displayguestdeatils(int num)
     {
     //Creates a table for the selected option//
@@ -577,7 +578,7 @@ void checkoutguest()
                 "|         HOTEL       BILL           |\n" +
                 "======================================");
         foreach (Room r in temp_list[choice].HotelStay.RoomList)
-        {
+        {// This is to display what the guest got
             if (r.GetType() == typeof(StandardRoom))
             {
                 StandardRoom s_room = (StandardRoom)r;
@@ -611,6 +612,7 @@ void checkoutguest()
             }
             
         }
+        // This is the total bill for the guest before any deduction from the points
         Console.WriteLine(
             "|Total Bill: {0,24}|\n" +
             "" +
@@ -657,6 +659,7 @@ void checkoutguest()
                         }
                     }
                     total_cost -= points_to_redeem;
+                        // Prints the total price after deduction
                     Console.WriteLine(
                         "======================================\n" +
                         "|Total Bill: {0,24}|\n" +
@@ -680,12 +683,13 @@ void checkoutguest()
         // This is to offically check out the guest
         foreach(Guest g in guests)
         {
+           
             if (g.PassportNum == temp_list[choice].PassportNum)
             {
                 g.IsCheckedin= false;
                 g.Member.Points = temp_list[choice].Member.Points;
                 if (g.Member.Status == "Sliver")
-                    {
+                    {// This will display is there is an upgrade to the membership of the guest
                     if (g.Member.Points >= 200)
                     {
                         g.Member.Status = "Gold";
