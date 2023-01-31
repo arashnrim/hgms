@@ -516,39 +516,40 @@ void displayguestdeatils(int num)
     {
     //Creates a table for the selected option//
     Console.WriteLine(
-        "----------------------------------------------------------------------------------------------------------------------------\n" +
-        "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
-        "----------------------------------------------------------------------------------------------------------------------------\n" +
-        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
-        "----------------------------------------------------------------------------------------------------------------------------"
-        , "Name", "Passport Number", "Checkin Date", "Checkout Date", "Number of rooms", "Membership Status", "Current points", "Checked in",
-        guests[num].Name, guests[num].PassportNum, guests[num].HotelStay.CheckinDate.ToString("dd/mm/yyyy"), guests[num].HotelStay.CheckoutDate.ToString("dd/mm/yyyy"),
-        guests[num].HotelStay.RoomList.Count, guests[num].Member.Status, guests[num].Member.Points, guests[num].IsCheckedin);
+        "------------------------------------------------------------------------------------------------\n" +
+        "|{0,-18}|{1,-18}|{2,-18}|{3,-18}|{4,-18}|\n" +
+        "|{5,-18}|{6,-18}|{7,-18}|{8,-18}|{9,-18}|\n" +
+        "------------------------------------------------------------------------------------------------\n" +
+        "|{8,-18}|{9,-18}|{10,-18}|{11,-18}|{12,-18}|\n" +
+        "|{13,-18}|{14,-18}|{15,-18}|{16,-18}|{17,-18}|\n" +
+        "------------------------------------------------------------------------------------------------"
+        , "Name", "Passport Number", "Checkin Date", "Checkout Date", ""
+        , guests[num].Name, guests[num].PassportNum, guests[num].HotelStay.CheckinDate.ToString("dd/MM/yyyy"), guests[num].HotelStay.CheckoutDate.ToString("dd/MM/yyyy"),""
+        ,"Number of rooms", "Membership Status", "Current points", "Checked in",""
+        ,guests[num].HotelStay.RoomList.Count, guests[num].Member.Status, guests[num].Member.Points, guests[num].IsCheckedin, "");
     foreach (Room r in guests[num].HotelStay.RoomList)
     {
     if (r.GetType() == typeof(StandardRoom))
     {
         StandardRoom s = (StandardRoom)r;
         Console.WriteLine(
-                    "----------------------------------------------------------------------------------------------------------------------------\n" +
-                    "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
-                    "----------------------------------------------------------------------------------------------------------------------------\n" +
-                    "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
-                    "----------------------------------------------------------------------------------------------------------------------------"
-                    , "Room Number", "Bed Configuration", "Daily Rate", "RequireWifi", "RequireBreakfast", "", "", ""
-                    , s.RoomNumber, s.BedConfiguration, s.DailyRate, s.RequireWifi, s.RequireBreakfast, "", "", "");
+                    "------------------------------------------------------------------------------------------------\n" +
+                    "|{0,-18}|{1,-18}|{2,-18}|{3,-18}|{4,-18}|\n" +
+                    "|{5,-18}|{6,-18}|{7,-18}|{8,-18}|{9,-18}|\n" +
+                    "------------------------------------------------------------------------------------------------"
+                    , "Room Number", "Bed Configuration", "Daily Rate", "RequireWifi", "RequireBreakfast"
+                    , s.RoomNumber, s.BedConfiguration, s.DailyRate, s.RequireWifi, s.RequireBreakfast);
     }
     else if (r.GetType() == typeof(DeluxeRoom))
         {
             DeluxeRoom s = (DeluxeRoom)r;
             Console.WriteLine(
-                        "---------------------------------------------------------------------------------------------------------------------------\n" +
-                        "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
-                        "---------------------------------------------------------------------------------------------------------------------------\n" +
-                        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
-                        "---------------------------------------------------------------------------------------------------------------------------\n"
-                        , "Room Number", "Bed Configuration", "Daily Rate", "AdditionalBed", "", "", "", ""
-                        , s.RoomNumber, s.BedConfiguration, s.DailyRate, s.AdditionalBed, "", "", "", "");
+                        "------------------------------------------------------------------------------------------------\n" +
+                        "|{0,-18}|{1,-18}|{2,-18}|{3,-18}|{4,-18}|\n" +
+                        "|{5,-18}|{6,-18}|{7,-18}|{8,-18}|{9,-18}|\n" +
+                        "------------------------------------------------------------------------------------------------"
+                        , "Room Number", "Bed Configuration", "Daily Rate", "AdditionalBed",""
+                        , s.RoomNumber, s.BedConfiguration, s.DailyRate, s.AdditionalBed, "");
         }
 
     }
