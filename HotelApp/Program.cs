@@ -557,15 +557,15 @@ void checkoutguest()
     else
     {
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput("Your choice? ", 0, guests.Count, true);
-        if (user_choice > guests.Count)
+        int? user_choice = ValidateIntInput("Your choice? ", 0, guests.Count-1, true);
+        if (user_choice > guests.Count-1)
         {
             Console.WriteLine("Please enter a valid option");
-            guest_details();
+            checkoutguest();
         }
         else if (user_choice == null)
         {
-            guest_details();
+            checkoutguest();
         }
         int choice = Convert.ToInt32(user_choice);
         
