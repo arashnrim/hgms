@@ -22,7 +22,7 @@ while (cont)
             guestlist();
             break;
         case "2":
-            ListRooms(rooms, "The following rooms are available for check-in:");
+            ListRooms(rooms.Where(room => room.IsAvail).ToList(), "The following rooms are available for check-in:");
             break;
         case "3":
             guest_reg();
@@ -63,7 +63,6 @@ while (cont)
 void DisplayMenu(string title, string[] options)
 {
     Console.WriteLine($"========== {title} ==========");
-    
     for (int i = 0; i < options.Length; i++)
         Console.WriteLine($"[{i + 1}] {options[i]}");
     Console.WriteLine("[0] Exit");
@@ -211,17 +210,17 @@ void ConfigureRoom(Room roomsList)
     }
 }
 
-void CheckinGuest(List<Guest> g, List<Room> r)
+void CheckinGuest(List<Guest> guestsList, List<Room> roomsList)
 {
     // Shows a list of checked-out guests and prompts the user to select a guest to check-in
-    List<Guest> checkedoutGuests = g.Where(guest => !guest.IsCheckedin).ToList();
+    List<Guest> checkedoutGuests = guestsList.Where(guest => !guest.IsCheckedin).ToList();
     Guest? guest;
     ListGuests(checkedoutGuests);
     while (true)
     {
         var input = ValidateIntInput($"Who is checking in? Enter 1 to {checkedoutGuests.Count} inclusive: ", 0, checkedoutGuests.Count - 1, true);
         if (input == null) continue;
-        guest = g[input.Value];
+        guest = guestsList[input.Value];
         break;
     }
 
@@ -251,9 +250,8 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     do
     {
         Console.WriteLine();
-        ListRooms(r, "The following rooms are available for check-in:");
-        List<Room> availableRooms = r.Where(room => room.IsAvail).ToList();
-
+        List<Room> availableRooms = roomsList.Where(room => room.IsAvail).ToList();
+        ListRooms(availableRooms, "The following rooms are available for check-in:");
         while (true)
         {
             var input = ValidateIntInput($"Which room is {guest.Name} staying in? Enter 1 to {availableRooms.Count} inclusive: ", 0, availableRooms.Count - 1, true);
@@ -261,7 +259,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
             Room bookedRoom = availableRooms[input.Value];
 
             // Makes the room unavailable
-            r.Find(room => room.RoomNumber == bookedRoom.RoomNumber).IsAvail = false;
+            roomsList.Find(room => room.RoomNumber == bookedRoom.RoomNumber).IsAvail = false;
 
             ConfigureRoom(bookedRoom);
 
