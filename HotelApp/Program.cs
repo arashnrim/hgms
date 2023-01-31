@@ -773,7 +773,7 @@ void AlterStay(List<Guest> guests)
     else
     {
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput(0, temp_list.Count(), true, "Your Choice?");
+        int? user_choice = ValidateIntInput(0, temp_list.Count()-1, true, "Your Choice?");
         if (user_choice > temp_list.Count())
         {
             Console.WriteLine("Please enter a valid option");
