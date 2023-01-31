@@ -85,15 +85,19 @@ void ListGuests(List<Guest> guestsList)
         Console.WriteLine($"{guest.Name,-15} {guest.PassportNum,-15} {guest.Member.Status,-11} {guest.Member.Points}");
 }
 
-int? ValidateIntInput(int? lowerBound, int? upperBound, bool? offsetBounds, string prompt)
+int? ValidateIntInput(string prompt, int? lowerBound = null, int? upperBound = null, bool? offsetBounds = null)
 {
     Console.Write(prompt);
     try
     {
         int input = Convert.ToInt32(Console.ReadLine()) - (offsetBounds is true ? 1 : 0);
-        if ((lowerBound == null || upperBound == null) || (input >= lowerBound && input <= upperBound))
+        if (lowerBound == null && upperBound == null)
             return input;
-        throw new ArgumentOutOfRangeException(nameof(input));
+        if (lowerBound != null && upperBound == null)
+            return (input >= lowerBound) ? input : throw new ArgumentOutOfRangeException(nameof(input));
+        if (lowerBound == null && upperBound != null)
+            return (input <= upperBound) ? input : throw new ArgumentOutOfRangeException(nameof(input));
+        return (input >= lowerBound && input <= upperBound) ? input : throw new ArgumentOutOfRangeException(nameof(input));;
     }
     catch (FormatException)
     {
@@ -102,7 +106,9 @@ int? ValidateIntInput(int? lowerBound, int? upperBound, bool? offsetBounds, stri
     }
     catch (ArgumentOutOfRangeException)
     {
-        Console.WriteLine($"Input should be between {lowerBound + (offsetBounds is true ? 1 : 0)} and {upperBound + (offsetBounds is true ? 1 : 0)} inclusive.");
+        if (lowerBound != null && upperBound == null) Console.WriteLine($"Input should be at least {lowerBound + (offsetBounds is true ? 1 : 0)}.");
+        else if (lowerBound == null && upperBound != null) Console.WriteLine($"Input should be at most {upperBound + (offsetBounds is true ? 1 : 0)}.");
+        else Console.WriteLine($"Input should be between {lowerBound + (offsetBounds is true ? 1 : 0)} and {upperBound + (offsetBounds is true ? 1 : 0)} inclusive.");
         return null;
     }
 }
@@ -213,7 +219,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     ListGuests(checkedoutGuests);
     while (true)
     {
-        var input = ValidateIntInput(0, checkedoutGuests.Count - 1, true, $"Who is checking in? Enter 1 to {checkedoutGuests.Count} inclusive: ");
+        var input = ValidateIntInput($"Who is checking in? Enter 1 to {checkedoutGuests.Count} inclusive: ", 0, checkedoutGuests.Count - 1, true);
         if (input == null) continue;
         guest = g[input.Value];
         break;
@@ -250,8 +256,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
 
         while (true)
         {
-            var input = ValidateIntInput(0, availableRooms.Count - 1, true,
-                $"Which room is {guest.Name} staying in? Enter 1 to {availableRooms.Count} inclusive: ");
+            var input = ValidateIntInput($"Which room is {guest.Name} staying in? Enter 1 to {availableRooms.Count} inclusive: ", 0, availableRooms.Count - 1, true);
             if (input == null) continue;
             Room bookedRoom = availableRooms[input.Value];
 
@@ -285,6 +290,7 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     {
         Console.WriteLine(room.ToString());
     }
+    Console.WriteLine();
 }
 
 void ExtendStay(List<Guest> guestsList)
@@ -295,8 +301,7 @@ void ExtendStay(List<Guest> guestsList)
     ListGuests(checkedinGuests);
     while (true)
     {
-        int? input = ValidateIntInput(0, checkedinGuests.Count - 1, true,
-            $"Who would like to extend their stay? Enter 1 to {checkedinGuests.Count} inclusive: ");
+        int? input = ValidateIntInput($"Who would like to extend their stay? Enter 1 to {checkedinGuests.Count} inclusive: ", 0, checkedinGuests.Count - 1, true);
         if (input == null) continue;
         guest = checkedinGuests[input.Value];
         break;
@@ -308,7 +313,7 @@ void ExtendStay(List<Guest> guestsList)
     while (true)
     {
         Console.WriteLine();
-        int? input = ValidateIntInput(1, 7, false, $"How many days would you like to extend the stay for {guest.Name}? Enter 1 to 7 inclusive: ");
+        int? input = ValidateIntInput($"How many days would you like to extend the stay for {guest.Name}? ", lowerBound: 1);
         if (input == null) continue;
         DateTime newCheckoutDate = checkoutDate.AddDays(input.Value);
         bool? confirm =
@@ -325,6 +330,7 @@ void ExtendStay(List<Guest> guestsList)
     {
         Console.WriteLine(room.ToString());
     }
+    Console.WriteLine();
 }
 
 void ShowRevenueBreakdown(List<Guest> guestsList)
@@ -332,8 +338,7 @@ void ShowRevenueBreakdown(List<Guest> guestsList)
     int selectedYear;
     while (true)
     {
-        // Additional assumption: the hotel began operations from 2000 onwards, meaning that values before 2000 are invalid.
-        int? input = ValidateIntInput(null, null, null, "Enter the year: ");
+        int? input = ValidateIntInput("Enter the year: ");
         if (input == null) continue;
         selectedYear = input.Value;
         break;
@@ -458,15 +463,15 @@ void guest_details()
             i += 1;
         }
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput(0, guests.Count(), true, "Your Choice?");
+        int? user_choice = ValidateIntInput("Your choice? ", 0, guests.Count(), true);
         choice = Convert.ToInt32(user_choice);
         if (choice >= guests.Count())
         {
-            Console.WriteLine("Please enter a valid option");
+            Console.WriteLine("Please enter a valid option.");
         }
         else if (choice < 0)
         {
-            Console.WriteLine("Please enter a valid option");
+            Console.WriteLine("Please enter a valid option.");
         }
         else
         {
@@ -552,7 +557,7 @@ void checkoutguest()
     else
     {
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput(0, guests.Count, true, "Your Choice?");
+        int? user_choice = ValidateIntInput("Your choice? ", 0, guests.Count, true);
         if (user_choice > guests.Count)
         {
             Console.WriteLine("Please enter a valid option");
@@ -626,7 +631,8 @@ void checkoutguest()
             while (loop)
             {
                 bool? verify = ValidateBooleanInput($"You have {temp_list[choice].Member.Points} points to redeem. Do you want to redeem your points? (Y/N) ");
-                // Loop if any other answer is given
+                    // Loop if any other answer is given
+                    // This if is just a precaution
                 if (verify is null)
                 {
 
@@ -645,7 +651,7 @@ void checkoutguest()
                     int points_to_redeem = 0;
                     while (true)
                     {
-                        int? use_points = ValidateIntInput(0, temp_list[choice].Member.Points, false, $"You have {temp_list[choice].Member.Points} points, how many do you want to redeem?");
+                        int? use_points = ValidateIntInput($"You have {temp_list[choice].Member.Points} points, how many do you want to redeem?", 0, temp_list[choice].Member.Points, false);
                         if (use_points >= 0 && use_points <= temp_list[choice].Member.Points)
                         {
                             points_to_redeem = Convert.ToInt32(use_points);
@@ -735,15 +741,15 @@ void AlterStay(List<Guest> guestsList)
     }
     if (num_of_people_not_checked_in == guestsList.Count())
     {
-        Console.WriteLine("There are currently No one checked in");
+        Console.WriteLine("There are currently no one checked in.");
     }
     else
     {
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput(0, temp_list.Count()-1, true, "Your Choice?");
+        int? user_choice = ValidateIntInput("Your choice? ", 0, temp_list.Count()-1, true);
         if (user_choice > temp_list.Count())
         {
-            Console.WriteLine("Please enter a valid option");
+            Console.WriteLine("Please enter a valid option.");
             AlterStay(guestsList);
         }
         else if (user_choice == null)
@@ -815,7 +821,7 @@ void AlterStay(List<Guest> guestsList)
                         if (stay.RoomList.Count > 1)
                         {
                             displayguestdeatils(guestsList.IndexOf(guest));
-                            int? roomChoice = ValidateIntInput(0, stay.RoomList.Count - 1, true, "Enter the room number to change: ");
+                            int? roomChoice = ValidateIntInput("Enter the room number to change: ", 0, stay.RoomList.Count - 1, true);
                             if (roomChoice is null) continue;
                             room = stay.RoomList[Convert.ToInt32(roomChoice)];
                         }
