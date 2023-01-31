@@ -797,24 +797,7 @@ void AlterStay()
         if (guests[g].HotelStay.RoomList.Count > 1) 
         {
             Console.WriteLine("Which Room do you want to change? (Input Room Number)");
-        }
-        else
-        {
-            foreach (Room r in guests[g].HotelStay.RoomList)
-            {
-                if (r.GetType() == typeof(DeluxeRoom))
-                {
-                    Console.WriteLine(
-                    "1. Additional bed");
-                }
-                else
-                {
-                    Console.WriteLine(
-                    "1. Wifi\n" +
-                    "2. Breakfast");
-                }
-            }
-            int? stay_edit = ValidateIntInput(0, guests.Count, true, "What do you want to Add?");
+            //////////////////////////////////////////////////////////////////////////
         }
 
     }
