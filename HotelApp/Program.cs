@@ -461,7 +461,9 @@ void guest_reg()
     if (already_registered == false)
     {
         //Creates a new guest object and adds to the guest list
-        guests.Add(new Guest(name, p_number, new Stay(), new Membership("Ordinary", 0)));
+        Guest add = new Guest(name, p_number, new Stay(), new Membership("Ordinary", 0));
+        add.IsCheckedin= false;
+        guests.Add(add);
 
         //Add guest to the Guest CSV file
         using (StreamWriter sr = new StreamWriter("Guests.csv", false))
