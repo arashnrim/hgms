@@ -89,14 +89,16 @@ int? ValidateIntInput(string prompt, int? lowerBound = null, int? upperBound = n
     Console.Write(prompt);
     try
     {
-        int input = Convert.ToInt32(Console.ReadLine()) - (offsetBounds is true ? 1 : 0);
+        string input = Console.ReadLine();
+        if (input.ToUpper() == "X") return -1;
+        int intInput = Convert.ToInt32(input) - (offsetBounds is true ? 1 : 0);
         if (lowerBound == null && upperBound == null)
-            return input;
+            return intInput;
         if (lowerBound != null && upperBound == null)
-            return (input >= lowerBound) ? input : throw new ArgumentOutOfRangeException(nameof(input));
+            return (intInput >= lowerBound) ? intInput : throw new ArgumentOutOfRangeException(nameof(intInput));
         if (lowerBound == null && upperBound != null)
-            return (input <= upperBound) ? input : throw new ArgumentOutOfRangeException(nameof(input));
-        return (input >= lowerBound && input <= upperBound) ? input : throw new ArgumentOutOfRangeException(nameof(input));;
+            return (intInput <= upperBound) ? intInput : throw new ArgumentOutOfRangeException(nameof(intInput));
+        return (intInput >= lowerBound && intInput <= upperBound) ? intInput : throw new ArgumentOutOfRangeException(nameof(intInput));;
     }
     catch (FormatException)
     {
@@ -117,21 +119,23 @@ DateTime? ValidateDateTimeInput(string format, string prompt, DateTime? compareD
     Console.Write(prompt);
     try
     {
-        DateTime input =
-            DateTime.ParseExact(Console.ReadLine(), format, CultureInfo.InvariantCulture);
-        if (compareDate == null || comparison == null) return input;
-        int difference = input.Subtract(compareDate.Value).Days;
+        string input = Console.ReadLine();
+        if (input.ToUpper() == "X") return DateTime.MinValue;
+        DateTime iInput =
+            DateTime.ParseExact(input, format, CultureInfo.InvariantCulture);
+        if (compareDate == null || comparison == null) return iInput;
+        int difference = iInput.Subtract(compareDate.Value).Days;
         switch (comparison)
         {
             case "greater":
                 if (difference >= 0)
-                    return input;
-                throw new ArgumentOutOfRangeException(nameof(input),
+                    return iInput;
+                throw new ArgumentOutOfRangeException(nameof(iInput),
                     $"The given date is before the date {compareDate:dd/MM/yyyy}.");
             case "lesser":
                 if (difference <= 0)
-                    return input;
-                throw new ArgumentOutOfRangeException(nameof(input),
+                    return iInput;
+                throw new ArgumentOutOfRangeException(nameof(iInput),
                     $"The given date is after the date {compareDate:dd/MM/yyyy}.");
             default:
                 throw new ArgumentException("Invalid comparison type.");
@@ -218,8 +222,9 @@ void CheckinGuest(List<Guest> guestsList, List<Room> roomsList)
     ListGuests(checkedoutGuests);
     while (true)
     {
-        var input = ValidateIntInput($"Who is checking in? Enter 1 to {checkedoutGuests.Count} inclusive: ", 0, checkedoutGuests.Count - 1, true);
+        var input = ValidateIntInput($"Who is checking in? Enter 1 to {checkedoutGuests.Count} inclusive or X to cancel: ", 0, checkedoutGuests.Count - 1, true);
         if (input == null) continue;
+        if (input == -1) return;
         guest = guestsList[input.Value];
         break;
     }
@@ -229,15 +234,17 @@ void CheckinGuest(List<Guest> guestsList, List<Room> roomsList)
     DateTime? checkoutDate;
     while (true)
     {
-        var input = ValidateDateTimeInput("dd/MM/yyyy", $"\nWhen is {guest.Name} checking in? Enter in the format dd/MM/yyyy: ", DateTime.Today, "lesser");
+        var input = ValidateDateTimeInput("dd/MM/yyyy", $"\nWhen is {guest.Name} checking in? Enter in the format dd/MM/yyyy or X to cancel: ", DateTime.Today, "lesser");
         if (input == null) continue;
+        if (input == DateTime.MinValue) return;
         checkinDate = input;
         break;
     }
     while (true)
     {
-        var input = ValidateDateTimeInput("dd/MM/yyyy", $"When is {guest.Name} checking out? Enter in the format dd/MM/yyyy: ", checkinDate, "greater");
+        var input = ValidateDateTimeInput("dd/MM/yyyy", $"When is {guest.Name} checking out? Enter in the format dd/MM/yyyy or X to cancel: ", checkinDate, "greater");
         if (input == null) continue;
+        if (input == DateTime.MinValue) return;
         checkoutDate = input;
         break;
     }
@@ -254,8 +261,9 @@ void CheckinGuest(List<Guest> guestsList, List<Room> roomsList)
         ListRooms(availableRooms, "The following rooms are available for check-in:");
         while (true)
         {
-            var input = ValidateIntInput($"Which room is {guest.Name} staying in? Enter 1 to {availableRooms.Count} inclusive: ", 0, availableRooms.Count - 1, true);
+            var input = ValidateIntInput($"Which room is {guest.Name} staying in? Enter 1 to {availableRooms.Count} inclusive or X to cancel: ", 0, availableRooms.Count - 1, true);
             if (input == null) continue;
+            if (input == -1) return;
             Room bookedRoom = availableRooms[input.Value];
 
             // Makes the room unavailable
@@ -299,8 +307,9 @@ void ExtendStay(List<Guest> guestsList)
     ListGuests(checkedinGuests);
     while (true)
     {
-        int? input = ValidateIntInput($"Who would like to extend their stay? Enter 1 to {checkedinGuests.Count} inclusive: ", 0, checkedinGuests.Count - 1, true);
+        int? input = ValidateIntInput($"Who would like to extend their stay? Enter 1 to {checkedinGuests.Count} inclusive or X to cancel: ", 0, checkedinGuests.Count - 1, true);
         if (input == null) continue;
+        if (input == -1) return;
         guest = checkedinGuests[input.Value];
         break;
     }
@@ -311,8 +320,9 @@ void ExtendStay(List<Guest> guestsList)
     while (true)
     {
         Console.WriteLine();
-        int? input = ValidateIntInput($"How many days would you like to extend the stay for {guest.Name}? ", lowerBound: 1);
+        int? input = ValidateIntInput($"How many days would you like to extend the stay for {guest.Name}? Alternatively, enter X to cancel: ", lowerBound: 1);
         if (input == null) continue;
+        if (input == -1) return;
         DateTime newCheckoutDate = checkoutDate.AddDays(input.Value);
         bool? confirm =
             ValidateBooleanInput(
@@ -336,8 +346,9 @@ void ShowRevenueBreakdown(List<Guest> guestsList)
     int selectedYear;
     while (true)
     {
-        int? input = ValidateIntInput("Enter the year: ");
+        int? input = ValidateIntInput("Enter the year or X to cancel: ");
         if (input == null) continue;
+        if (input == -1) return;
         selectedYear = input.Value;
         break;
     }
@@ -461,7 +472,8 @@ void guest_details()
             i += 1;
         }
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput("Your choice? ", 0, guests.Count(), true);
+        int? user_choice = ValidateIntInput("Your choice? Alternatively, enter X to cancel ", 0, guests.Count(), true);
+        if (user_choice == -1) return;
         choice = Convert.ToInt32(user_choice);
         if (choice >= guests.Count())
         {
@@ -555,7 +567,8 @@ void checkoutguest()
     else
     {
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput("Your choice? ", 0, guests.Count-1, true);
+        int? user_choice = ValidateIntInput("Your choice? Alternatively, enter X to cancel: ", 0, guests.Count-1, true);
+        if (user_choice == -1) return;
         if (user_choice > guests.Count-1)
         {
             Console.WriteLine("Please enter a valid option");
@@ -744,7 +757,8 @@ void AlterStay(List<Guest> guestsList)
     else
     {
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput("Your choice? ", 0, temp_list.Count()-1, true);
+        int? user_choice = ValidateIntInput("Your choice? Alternatively, enter X to cancel: ", 0, temp_list.Count()-1, true);
+        if (user_choice == -1) return;
         if (user_choice > temp_list.Count())
         {
             Console.WriteLine("Please enter a valid option.");
@@ -787,9 +801,10 @@ void AlterStay(List<Guest> guestsList)
                     {
                         string situation = choice == "1" ? "check-in" : "check-out";
                         DateTime? newDate = ValidateDateTimeInput("dd/MM/yyyy",
-                            $"Enter the new {situation} date (dd/MM/yyyy): ",
+                            $"Enter the new {situation} date in dd/MM/yyyy format or X to cancel: ",
                             choice == "1" ? DateTime.Today : stay.CheckinDate.AddDays(1), choice == "1" ? "lesser" : "greater");
                         if (newDate == null) continue;
+                        if (newDate == DateTime.MinValue) return;
                         while (true)
                         {
                             bool? confirm =
@@ -819,7 +834,8 @@ void AlterStay(List<Guest> guestsList)
                         if (stay.RoomList.Count > 1)
                         {
                             displayguestdeatils(guestsList.IndexOf(guest));
-                            int? roomChoice = ValidateIntInput("Enter the room number to change: ", 0, stay.RoomList.Count - 1, true);
+                            int? roomChoice = ValidateIntInput("Enter the room number to change or X to cancel: ", 0, stay.RoomList.Count - 1, true);
+                            if (roomChoice == -1) break;
                             if (roomChoice is null) continue;
                             room = stay.RoomList[Convert.ToInt32(roomChoice)];
                         }
