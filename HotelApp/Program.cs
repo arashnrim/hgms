@@ -666,7 +666,8 @@ void checkoutguest()
                 while (loop == true)
                 {
                 bool? verify = ValidateBooleanInput($"You have {temp_list[choice].Member.Points} points to redeem. Do you want to redeem your points? (Y/N) ");
-                // Loop if any other answer is given
+                    // Loop if any other answer is given
+                    // This if is just a precaution
                 if (verify is null)
                     {
 
@@ -709,7 +710,7 @@ void checkoutguest()
                     }
                     loop = false;
                 }
-                break;
+                
             }
         }
         temp_list[choice].Member.EarnPoints(total_cost);
