@@ -1,7 +1,4 @@
 ﻿using HotelApp;
-using System.Data.SqlTypes;
-using System.Diagnostics.CodeAnalysis;
-using System.Xml.Schema;
 
 List<Room> rooms = new List<Room>();
 List<Guest> guests = new List<Guest>();
@@ -46,7 +43,7 @@ while (cont)
             ShowRevenueBreakdown(guests);
             break;
         case "9":
-            alterstay();
+            AlterStay();
             break;
         case "0":
             cont = false;
@@ -67,7 +64,7 @@ void DisplayMenu()
 {
     Console.WriteLine("========== ICT Hotel Guest Management System ==========");
 
-    string[] options = { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest","Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year", "Alter Stay" };
+    string[] options = { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year", "Alter a member's stay" };
     for (int i = 0; i < options.Length; i++)
         Console.WriteLine($"[{i + 1}] {options[i]}");
     Console.WriteLine("[0] Exit");
@@ -89,17 +86,17 @@ void ListAvailableRooms(List<Room> r)
 {
     List<Room> availableRooms = GetAvailableRooms(r);
     Console.WriteLine("The following rooms are available for check-in:");
+    Console.WriteLine($"{"Room No.",-11} {"Type",-11} {"Bed Config.",-14} Daily rate");
     foreach (Room room in availableRooms)
-        Console.WriteLine(room);
+        Console.WriteLine($"{room.RoomNumber,-11} {((room is StandardRoom) ? "Standard" : "Deluxe"), -11} {room.BedConfiguration,-14} ${room.DailyRate:0.00}");
 }
 
 void ListGuests(List<Guest> g)
 {
     Console.WriteLine("The following guests are registered:");
+    Console.WriteLine($"{"Name",-15} {"Passport No.",-15} {"Status",-11} Points");
     foreach (Guest guest in g)
-    {
-        Console.WriteLine(guest);
-    }
+        Console.WriteLine($"{guest.Name,-15} {guest.PassportNum,-15} {guest.Member.Status,-11} {guest.Member.Points}");
 }
 
 List<Guest> GetCheckedoutGuests(List<Guest> g)
@@ -400,121 +397,6 @@ void ShowRevenueBreakdown(List<Guest> g)
 
     double total = breakdown.Sum();
     Console.WriteLine($"\nTotal:\t\t${total:0.00}");
-}
-
-//==========================================================
-// INITIALIZATION METHODS
-// The functions below are created and called to initialize
-// the required variables and objects for the program to
-// work.
-//==========================================================
-
-void InitializeRooms(List<Room> r)
-{
-    using StreamReader sr = new StreamReader("Rooms.csv");
-    string? line = sr.ReadLine();
-    while ((line = sr.ReadLine()) != null)
-    {
-        string[] data = line.Split(',');
-
-        // Creates a specific room (with a specific room type depending on what is read from the file)
-        Room room = data[0] switch
-        {
-            "Standard" => new StandardRoom(Convert.ToInt32(data[1]), data[2], Convert.ToDouble(data[3]), true),
-            "Deluxe" => new DeluxeRoom(Convert.ToInt32(data[1]), data[2], Convert.ToDouble(data[3]), true),
-            _ => throw new Exception($"Invalid room type for room {data[1]}.")
-        };
-
-        // Adds the room to the list of rooms
-        r.Add(room);
-    }
-}
-
-void InitializeRoom(List<Room> initRoomList, Room? r, Guest g, string checkedIn, string[] requirements, bool optional = false)
-{
-    try
-    {
-        if (r != null)
-        {
-            if (checkedIn == "TRUE")
-            {
-                g.IsCheckedin = true;
-                r.IsAvail = false;
-                if (requirements[0] == "TRUE" && r is StandardRoom sWRoom)
-                    sWRoom.RequireWifi = true;
-                if (requirements[1] == "TRUE" && r is StandardRoom sBRoom)
-                    sBRoom.RequireBreakfast = true;
-                if (requirements[2] == "TRUE" && r is DeluxeRoom dRoom)
-                    dRoom.AdditionalBed = true;
-            }
-
-            initRoomList.Add(r);
-        }
-        else
-            throw new ArgumentOutOfRangeException(nameof(initRoomList), "A stay must have at least one room.");
-    }
-    catch (ArgumentOutOfRangeException argEx)
-    {
-        Console.WriteLine(argEx.Message);
-    }
-    catch (FormatException)
-    {
-        if (!optional)
-        {
-            Console.WriteLine("Invalid data format. Please check the data file.");
-        }
-    }
-}
-
-void InitializeGuests(List<Guest> g, List<Room> r)
-{
-    // IMPORTANT: InitializeRooms() must be invoked before this function.
-
-    using StreamReader sr = new StreamReader("Guests.csv");
-    string? line = sr.ReadLine();
-    while ((line = sr.ReadLine()) != null)
-    {
-        string[] data = line.Split(',');
-        Guest guest = new Guest();
-
-        // Creates a stay object
-        Stay? stay = null;
-        using (StreamReader staySR = new StreamReader("Stays.csv"))
-        {
-            string? stayLine = staySR.ReadLine();
-
-            while ((stayLine = staySR.ReadLine()) != null)
-            {
-                string[] stayData = stayLine.Split(',');
-
-                // Ignores stays that don't match the guest's passport number
-                if (stayData[1] != data[1])
-                    continue;
-
-                // Initializes the stay object
-                stay = new Stay(Convert.ToDateTime(stayData[3]), Convert.ToDateTime(stayData[4]));
-
-                // Adds the room that the guest has for a particular stay
-                Room? room1 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[5]));
-                InitializeRoom(stay.RoomList, room1, guest, stayData[2], new []{stayData[6], stayData[7], stayData[8]}, true);
-
-                if (stayData[9] == "") continue;
-                Room? room2 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[9]));
-                InitializeRoom(stay.RoomList, room2, guest, stayData[2],
-                    new[] { stayData[10], stayData[11], stayData[12] }, true);
-            }
-        }
-
-        // Creates a membership object
-        Membership membership = new Membership(data[2], Convert.ToInt32(data[3]));
-
-        // Creates a guest object
-        guest.Name = data[0];
-        guest.PassportNum = data[1];
-        guest.Member = membership;
-        guest.HotelStay = stay ?? new Stay();
-        g.Add(guest);
-    }
 }
 
 void guestlist()
@@ -856,9 +738,7 @@ void checkoutguest()
     }
 }
 
-
-
-void alterstay()
+void AlterStay()
 {
     int num = 1;
     int num_of_people_not_checked_in = 0;
@@ -894,11 +774,11 @@ void alterstay()
         if (user_choice > guests.Count)
         {
             Console.WriteLine("Please enter a valid option");
-            alterstay();
+            AlterStay();
         }
         else if (user_choice == null)
         {
-            alterstay();
+            AlterStay();
         }
 
         // int g will be the guest we edit when we call guests[g]
@@ -935,5 +815,120 @@ void alterstay()
             int? stay_edit = ValidateIntInput(0, guests.Count, true, "What do you want to Add?");
         }
 
+    }
+}
+
+//==========================================================
+// INITIALIZATION METHODS
+// The functions below are created and called to initialize
+// the required variables and objects for the program to
+// work.
+//==========================================================
+
+void InitializeRooms(List<Room> r)
+{
+    using StreamReader sr = new StreamReader("Rooms.csv");
+    string? line = sr.ReadLine();
+    while ((line = sr.ReadLine()) != null)
+    {
+        string[] data = line.Split(',');
+
+        // Creates a specific room (with a specific room type depending on what is read from the file)
+        Room room = data[0] switch
+        {
+            "Standard" => new StandardRoom(Convert.ToInt32(data[1]), data[2], Convert.ToDouble(data[3]), true),
+            "Deluxe" => new DeluxeRoom(Convert.ToInt32(data[1]), data[2], Convert.ToDouble(data[3]), true),
+            _ => throw new Exception($"Invalid room type for room {data[1]}.")
+        };
+
+        // Adds the room to the list of rooms
+        r.Add(room);
+    }
+}
+
+void InitializeRoom(List<Room> initRoomList, Room? r, Guest g, string checkedIn, string[] requirements, bool optional = false)
+{
+    try
+    {
+        if (r != null)
+        {
+            if (checkedIn == "TRUE")
+            {
+                g.IsCheckedin = true;
+                r.IsAvail = false;
+                if (requirements[0] == "TRUE" && r is StandardRoom sWRoom)
+                    sWRoom.RequireWifi = true;
+                if (requirements[1] == "TRUE" && r is StandardRoom sBRoom)
+                    sBRoom.RequireBreakfast = true;
+                if (requirements[2] == "TRUE" && r is DeluxeRoom dRoom)
+                    dRoom.AdditionalBed = true;
+            }
+
+            initRoomList.Add(r);
+        }
+        else
+            throw new ArgumentOutOfRangeException(nameof(initRoomList), "A stay must have at least one room.");
+    }
+    catch (ArgumentOutOfRangeException argEx)
+    {
+        Console.WriteLine(argEx.Message);
+    }
+    catch (FormatException)
+    {
+        if (!optional)
+        {
+            Console.WriteLine("Invalid data format. Please check the data file.");
+        }
+    }
+}
+
+void InitializeGuests(List<Guest> g, List<Room> r)
+{
+    // IMPORTANT: InitializeRooms() must be invoked before this function.
+
+    using StreamReader sr = new StreamReader("Guests.csv");
+    string? line = sr.ReadLine();
+    while ((line = sr.ReadLine()) != null)
+    {
+        string[] data = line.Split(',');
+        Guest guest = new Guest();
+
+        // Creates a stay object
+        Stay? stay = null;
+        using (StreamReader staySR = new StreamReader("Stays.csv"))
+        {
+            string? stayLine = staySR.ReadLine();
+
+            while ((stayLine = staySR.ReadLine()) != null)
+            {
+                string[] stayData = stayLine.Split(',');
+
+                // Ignores stays that don't match the guest's passport number
+                if (stayData[1] != data[1])
+                    continue;
+
+                // Initializes the stay object
+                stay = new Stay(Convert.ToDateTime(stayData[3]), Convert.ToDateTime(stayData[4]));
+
+                // Adds the room that the guest has for a particular stay
+                Room? room1 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[5]));
+                InitializeRoom(stay.RoomList, room1, guest, stayData[2], new []{stayData[6], stayData[7], stayData[8]}, true);
+
+                if (stayData[9] == "") continue;
+                Room? room2 = r.Find(room => room.RoomNumber == Convert.ToInt32(stayData[9]));
+                InitializeRoom(stay.RoomList, room2, guest, stayData[2],
+                    new[] { stayData[10], stayData[11], stayData[12] }, true);
+            }
+        }
+
+        // Creates a membership object
+        Membership membership = new Membership(data[2], Convert.ToInt32(data[3]));
+
+        // Creates a guest object
+        guest.Name = data[0];
+        guest.PassportNum = data[1];
+        guest.Member = membership;
+        guest.HotelStay = stay ?? new Stay();
+        g.Add(guest);
     }
 }
