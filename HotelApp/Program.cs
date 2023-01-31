@@ -1,4 +1,5 @@
-﻿using HotelApp;
+﻿using System.Globalization;
+using HotelApp;
 
 List<Room> rooms = new List<Room>();
 List<Guest> guests = new List<Guest>();
@@ -10,7 +11,7 @@ InitializeGuests(guests, rooms);
 bool cont = true;
 while (cont)
 {
-    DisplayMenu();
+    DisplayMenu("ICT Hotel Guest Management System", new string[] { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year", "Alter a guest's stay" });
     Console.Write("Enter an option: ");
     string choice = Console.ReadLine();
     Console.WriteLine();
@@ -43,7 +44,7 @@ while (cont)
             ShowRevenueBreakdown(guests);
             break;
         case "9":
-            AlterStay();
+            AlterStay(guests);
             break;
         case "0":
             cont = false;
@@ -60,11 +61,10 @@ while (cont)
 // METHODS
 //==========================================================
 
-void DisplayMenu()
+void DisplayMenu(string title, string[] options)
 {
-    Console.WriteLine("========== ICT Hotel Guest Management System ==========");
-
-    string[] options = { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year", "Alter a member's stay" };
+    Console.WriteLine($"========== {title} ==========");
+    
     for (int i = 0; i < options.Length; i++)
         Console.WriteLine($"[{i + 1}] {options[i]}");
     Console.WriteLine("[0] Exit");
@@ -740,7 +740,7 @@ void checkoutguest()
     }
 }
 
-void AlterStay()
+void AlterStay(List<Guest> guests)
 {
     int num = 1;
     int num_of_people_not_checked_in = 0;
@@ -765,22 +765,22 @@ void AlterStay()
             num_of_people_not_checked_in += 1;
         }
     }
-    if (num_of_people_not_checked_in == guests.Count)
+    if (num_of_people_not_checked_in == guests.Count())
     {
         Console.WriteLine("There are currently No one checked in");
     }
     else
     {
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput(0, guests.Count, true, "Your Choice?");
-        if (user_choice > guests.Count)
+        int? user_choice = ValidateIntInput(0, temp_list.Count(), true, "Your Choice?");
+        if (user_choice > temp_list.Count())
         {
             Console.WriteLine("Please enter a valid option");
-            AlterStay();
+            AlterStay(guests);
         }
         else if (user_choice == null)
         {
-            AlterStay();
+            AlterStay(guests);
         }
 
         // int g will be the guest we edit when we call guests[g]
@@ -794,12 +794,106 @@ void AlterStay()
             g += 1;
         }
         displayguestdeatils(g);
-        if (guests[g].HotelStay.RoomList.Count > 1) 
-        {
-            Console.WriteLine("Which Room do you want to change? (Input Room Number)");
-            //////////////////////////////////////////////////////////////////////////
-        }
+        Guest guest = guests[g];
+        Stay stay = guest.HotelStay;
 
+        // Shows a short menu of what to change
+        while (true)
+        {
+            Console.WriteLine();
+            DisplayMenu("Alter a guest's stay", new string[] { "Change check-in date", "Change check-out date", "Change room configuration" });
+            Console.Write("Enter an option: ");
+            string choice = Console.ReadLine();
+            Console.WriteLine();
+
+            switch (choice)
+            {
+                case "1":
+                case "2":
+                    // Changes the check-in or check-out date
+                    do
+                    {
+                        string situation = choice == "1" ? "check-in" : "check-out";
+                        DateTime? newDate = ValidateDateTimeInput("dd/MM/yyyy",
+                            $"Enter the new {situation} date (dd/MM/yyyy): ", DateTime.Today, "lesser");
+                        if (newDate != null)
+                        {
+                            while (true)
+                            {
+                                bool? confirm =
+                                    ValidateBooleanInput(
+                                        $"Are you sure you want to change the {situation} date from {(choice == "1" ? stay.CheckinDate : stay.CheckoutDate):0.00} to {newDate:0.00}? (Y/N) ");
+                                if (confirm is null) continue;
+                                string capitalizedString = situation.Substring(0, 1).ToUpper() + situation.Substring(1);
+                                if (confirm is true)
+                                {
+                                    stay.CheckinDate = Convert.ToDateTime(newDate);
+                                    Console.WriteLine($"{capitalizedString} date changed successfully!");
+                                    break;
+                                }
+
+                                Console.WriteLine($"{capitalizedString} date not changed.");
+                                break;
+                            }
+
+                            break;
+                        }
+                    } while (true);
+                    break;
+                case "3":
+                    do
+                    {
+                        // If the guest has more than one room, prompt them to make a choice
+                        Room room;
+                        if (stay.RoomList.Count > 1)
+                        {
+                            displayguestdeatils(guests.IndexOf(guest));
+                            int? roomChoice = ValidateIntInput(0, stay.RoomList.Count - 1, true, "Enter the room number to change: ");
+                            if (roomChoice is null) continue;
+                            room = stay.RoomList[Convert.ToInt32(roomChoice)];
+                        }
+                        else
+                            room = stay.RoomList[0];
+
+                        // Display the room details
+                        Console.WriteLine("Room details:");
+                        Console.WriteLine($"Room number: {room.RoomNumber}");
+
+                        switch (room)
+                        {
+                            case StandardRoom sr:
+                                Console.WriteLine($"Requires Wi-Fi: {(sr.RequireWifi ? "Yes" : "No")}");
+                                Console.WriteLine($"Requires breakfast: {(sr.RequireWifi ? "Yes" : "No")}");
+                                break;
+                            case DeluxeRoom dr:
+                                Console.WriteLine($"Additional bed: {(dr.AdditionalBed ? "Yes" : "No")}");
+                                break;
+                        }
+
+                        ConfigureRoom(room);
+
+                        // Prompt the user to confirm the changes
+                        do
+                        {
+                            bool? confirm = ValidateBooleanInput("Are you sure you want to make these changes? (Y/N) ");
+                            if (confirm is null) continue;
+                            if (confirm is true)
+                            {
+                                Console.WriteLine("Changes made successfully!");
+                                break;
+                            }
+                            Console.WriteLine("Changes not made.");
+                            break;
+                        } while (true);
+
+                        break;
+                    } while (true);
+
+                    break;
+                case "0":
+                    return;
+            }
+        }
     }
 }
 
