@@ -648,7 +648,7 @@ void checkoutguest()
                     // This if is just a precaution
                 if (verify is null)
                 {
-
+                
                 }
                 
                 else if (verify is not true)
@@ -684,10 +684,10 @@ void checkoutguest()
                     Console.ReadLine();
                     Console.WriteLine($"Your redeemed {points_to_redeem} out of {temp_list[choice].Member.Points} points ");
                     temp_list[choice].Member.RedeemPoints(points_to_redeem);
-                    
+                    loop = false;
                     break;
                 }
-                loop = false;
+                
             }
             break;
         }
