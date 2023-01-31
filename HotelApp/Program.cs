@@ -823,7 +823,7 @@ void AlterStay(List<Guest> guests)
                             {
                                 bool? confirm =
                                     ValidateBooleanInput(
-                                        $"Are you sure you want to change the {situation} date from {(choice == "1" ? stay.CheckinDate : stay.CheckoutDate):0.00} to {newDate:0.00}? (Y/N) ");
+                                        $"Are you sure you want to change the {situation} date from {(choice == "1" ? stay.CheckinDate : stay.CheckoutDate):dd/MM/yyyy} to {newDate:dd/MM/yyyy}? (Y/N) ");
                                 if (confirm is null) continue;
                                 string capitalizedString = situation.Substring(0, 1).ToUpper() + situation.Substring(1);
                                 if (confirm is true)
