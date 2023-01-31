@@ -415,7 +415,7 @@ void guestlist()
         {
             Console.WriteLine("\n\n===================================");
             Console.WriteLine("Guest's name: {0,0} \nPassport Number: {1,0} \nMembership: {2,0} \nPoints: {3,0} \nCheck in Date: {4,0} \nCheck out Date: {5,0}"
-                , g.Name, g.PassportNum, g.Member.Status, g.Member.Points, g.HotelStay.CheckinDate, g.HotelStay.CheckoutDate);
+                , g.Name, g.PassportNum, g.Member.Status, g.Member.Points, g.HotelStay.CheckinDate.ToString("dd/MM/yyyy"), g.HotelStay.CheckoutDate.ToString("dd/MM/yyyy"));
         }
         
     }
@@ -619,39 +619,39 @@ void checkoutguest()
                 StandardRoom s_room = (StandardRoom)r;
                 total_cost += s_room.CalculateCharges()*days_stayed;
                     Console.WriteLine(
-                        "|Room Number: {0,-23}|\n" +
-                        "|Room Type: {1,-25}|\n" +
-                        "|Bed Configureation: {2,-16}|\n" +
-                        "|Days Stayed: {3,-23}|\n" +
-                        "|Wi-Fi $10 Added: {4,-19}|\n" +
-                        "|Breakfast $20 Added: {5,-15}|\n" +
-                        "|Daily Rate: ${6,-23}|\n" +
-                        "|Cost : ${7,-28}|\n" +
+                        "|Room Number: {0,23}|\n" +
+                        "|Room Type: {1,25}|\n" +
+                        "|Bed Configureation: {2,16}|\n" +
+                        "|Days Stayed: {3,23}|\n" +
+                        "|Wi-Fi $10 Added: {4,19}|\n" +
+                        "|Breakfast $20 Added: {5,15}|\n" +
+                        "|Daily Rate: {6,24}|\n" +
+                        "|Cost : {7,29}|\n" +
                         "======================================"
-                        , r.RoomNumber, "Standard Room",s_room.BedConfiguration,days_stayed, s_room.RequireWifi, s_room.RequireBreakfast,s_room.CalculateCharges().ToString("0.00"),(r.CalculateCharges()*days_stayed).ToString("0.00"));
+                        , r.RoomNumber, "Standard Room",s_room.BedConfiguration,days_stayed, s_room.RequireWifi, s_room.RequireBreakfast,s_room.CalculateCharges().ToString("$0.00"),(r.CalculateCharges()*days_stayed).ToString("$0.00"));
             }
             else if (r.GetType() == typeof(DeluxeRoom))
                 {
                     DeluxeRoom s_room = (DeluxeRoom)r;
                     total_cost += s_room.CalculateCharges() * days_stayed;
                     Console.WriteLine(
-                        "|Room Number: {0,-23}|\n" +
-                        "|Room Type: {1,-25}|\n" +
-                        "|Bed Configuration: {2,-17}|\n" +
-                        "|Days Stayed: {3,-23}|\n" +
-                        "|Additional Bed $25: {4,-16}|\n" +
-                        "|Daily Rate: ${5,-23}|\n" +
-                        "|Cost : ${6,-28}|\n" +
+                        "|Room Number: {0,23}|\n" +
+                        "|Room Type: {1,25}|\n" +
+                        "|Bed Configuration: {2,17}|\n" +
+                        "|Days Stayed: {3,23}|\n" +
+                        "|Additional Bed $25: {4,16}|\n" +
+                        "|Daily Rate: {5,24}|\n" +
+                        "|Cost : {6,29}|\n" +
                         "======================================"
-                        , r.RoomNumber, "Deluxe Room",s_room.BedConfiguration, days_stayed,s_room.AdditionalBed, s_room.CalculateCharges().ToString("0.00"),  (s_room.CalculateCharges() * days_stayed).ToString("0.00"));
+                        , r.RoomNumber, "Deluxe Room",s_room.BedConfiguration, days_stayed,s_room.AdditionalBed, s_room.CalculateCharges().ToString("$0.00"),  (s_room.CalculateCharges() * days_stayed).ToString("$0.00"));
             }
             
         }
         Console.WriteLine(
-            "|Total Bill: ${0,-23}|\n" +
+            "|Total Bill: {0,24}|\n" +
             "" +
             "======================================"
-            , total_cost.ToString("0.00"));
+            , total_cost.ToString("$0.00"));
         
         while (true)
         {   // check if the user is eligible for the points system
