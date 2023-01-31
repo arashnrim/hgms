@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using HotelApp;
 
-List<Room> rooms = new List<Room>();
-List<Guest> guests = new List<Guest>();
+List<Room> rooms = new();
+List<Guest> guests = new();
 
 // Initializes the rooms and guests used in the application.
 InitializeRooms(rooms);
@@ -11,7 +11,7 @@ InitializeGuests(guests, rooms);
 bool cont = true;
 while (cont)
 {
-    DisplayMenu("ICT Hotel Guest Management System", new string[] { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year", "Alter a guest's stay" });
+    DisplayMenu("ICT Hotel Guest Management System", new[] { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest", "Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year", "Alter a guest's stay" });
     Console.Write("Enter an option: ");
     string choice = Console.ReadLine();
     Console.WriteLine();
@@ -22,7 +22,7 @@ while (cont)
             guestlist();
             break;
         case "2":
-            ListAvailableRooms(rooms);
+            ListRooms(rooms, "The following rooms are available for check-in:");
             break;
         case "3":
             guest_reg();
@@ -34,7 +34,6 @@ while (cont)
             checkoutguest();
             break;
         case "6":
-            // TODO: Show stay details for a guest
             guest_details();
             break;
         case "7":
@@ -70,77 +69,40 @@ void DisplayMenu(string title, string[] options)
     Console.WriteLine("[0] Exit");
 }
 
-List<Room> GetAvailableRooms(List<Room> r)
+void ListRooms(List<Room> roomsList, string? prompt)
 {
-    List<Room> availableRooms = new List<Room>();
-    foreach (Room room in r)
-    {
-        if (room.IsAvail)
-            availableRooms.Add(room);
-    }
-
-    return availableRooms;
-}
-
-void ListAvailableRooms(List<Room> r)
-{
-    List<Room> availableRooms = GetAvailableRooms(r);
-    Console.WriteLine("The following rooms are available for check-in:");
-    Console.WriteLine($"{"Room No.",-11} {"Type",-11} {"Bed Config.",-14} Daily rate");
-    foreach (Room room in availableRooms)
+    if (prompt != null) Console.WriteLine(prompt);
+        Console.WriteLine($"{"Room No.",-11} {"Type",-11} {"Bed Config.",-14} Daily rate");
+    foreach (Room room in roomsList)
         Console.WriteLine($"{room.RoomNumber,-11} {((room is StandardRoom) ? "Standard" : "Deluxe"), -11} {room.BedConfiguration,-14} ${room.DailyRate:0.00}");
 }
 
-void ListGuests(List<Guest> g)
+void ListGuests(List<Guest> guestsList)
 {
     Console.WriteLine("The following guests are registered:");
     Console.WriteLine($"{"Name",-15} {"Passport No.",-15} {"Status",-11} Points");
-    foreach (Guest guest in g)
+    foreach (Guest guest in guestsList)
         Console.WriteLine($"{guest.Name,-15} {guest.PassportNum,-15} {guest.Member.Status,-11} {guest.Member.Points}");
 }
 
-List<Guest> GetCheckedoutGuests(List<Guest> g)
-{
-    List<Guest> checkedoutGuests = new List<Guest>();
-    foreach (Guest guest in g)
-    {
-        if (!guest.IsCheckedin)
-            checkedoutGuests.Add(guest);
-    }
-
-    return checkedoutGuests;
-}
-
-List<Guest> GetCheckedinGuests(List<Guest> g)
-{
-    List<Guest> checkedinGuests = new List<Guest>();
-    foreach (Guest guest in g)
-    {
-        if (guest.IsCheckedin)
-            checkedinGuests.Add(guest);
-    }
-
-    return checkedinGuests;
-}
-
-int? ValidateIntInput(int lowerBound, int higherBound, bool offset, string prompt)
+int? ValidateIntInput(int? lowerBound, int? upperBound, bool? offsetBounds, string prompt)
 {
     Console.Write(prompt);
     try
     {
-        int input = Convert.ToInt32(Console.ReadLine()) - (offset ? 1 : 0);
-        if (input >= lowerBound && input <= higherBound)
+        int input = Convert.ToInt32(Console.ReadLine()) - (offsetBounds is true ? 1 : 0);
+        if ((lowerBound == null || upperBound == null) || (input >= lowerBound && input <= upperBound))
             return input;
         throw new ArgumentOutOfRangeException(nameof(input));
     }
     catch (FormatException)
     {
-        Console.WriteLine($"Input should be a numerical value.");
+        Console.WriteLine("Input should be a numerical value.");
         return null;
     }
     catch (ArgumentOutOfRangeException)
     {
-        Console.WriteLine($"Input should be between {lowerBound + (offset ? 1 : 0)} and {higherBound + (offset ? 1 : 0)} inclusive.");
+        Console.WriteLine($"Input should be between {lowerBound + (offsetBounds is true ? 1 : 0)} and {upperBound + (offsetBounds is true ? 1 : 0)} inclusive.");
         return null;
     }
 }
@@ -151,7 +113,7 @@ DateTime? ValidateDateTimeInput(string format, string prompt, DateTime? compareD
     try
     {
         DateTime input =
-            DateTime.ParseExact(Console.ReadLine(), format, System.Globalization.CultureInfo.InvariantCulture);
+            DateTime.ParseExact(Console.ReadLine(), format, CultureInfo.InvariantCulture);
         if (compareDate == null || comparison == null) return input;
         int difference = input.Subtract(compareDate.Value).Days;
         switch (comparison)
@@ -172,17 +134,17 @@ DateTime? ValidateDateTimeInput(string format, string prompt, DateTime? compareD
     }
     catch (FormatException)
     {
-        Console.WriteLine($"Input should be in the format dd/MM/yyyy.");
+        Console.WriteLine($"Input should be in the format {format}.");
         return null;
     }
-    catch (ArgumentOutOfRangeException ex)
+    catch (ArgumentOutOfRangeException e)
     {
-        Console.WriteLine(ex.Message);
+        Console.WriteLine(e.Message);
         return null;
     }
-    catch (ArgumentException ex)
+    catch (ArgumentException e)
     {
-        Console.WriteLine(ex.Message);
+        Console.WriteLine(e.Message);
         return null;
     }
 }
@@ -198,21 +160,21 @@ bool? ValidateBooleanInput(string prompt)
         bool inputBoolean = input == "Y";
         return inputBoolean;
     }
-    catch (ArgumentOutOfRangeException ex)
+    catch (ArgumentOutOfRangeException e)
     {
-        Console.WriteLine(ex.Message);
+        Console.WriteLine(e.Message);
         return null;
     }
 }
 
 // Configures the room with the additional information, like whether Wi-Fi, breakfast, or 
 // an additional bed is required.
-void ConfigureRoom(Room r)
+void ConfigureRoom(Room roomsList)
 {
     string[] options = { "Wi-Fi", "breakfast", "an additional bed" };
     foreach (string option in options)
     {
-        switch (r)
+        switch (roomsList)
         {
             // Specifically blacklists the options based on what is allowed for each room type
             case StandardRoom when option == "an additional bed":
@@ -224,18 +186,18 @@ void ConfigureRoom(Room r)
         while (true)
         {
             var input =
-                ValidateBooleanInput($"Is {option} needed for room {r.RoomNumber}? (Y/N): ");
+                ValidateBooleanInput($"Is {option} needed for room {roomsList.RoomNumber}? (Y/N): ");
             if (input == null) continue;
             switch (option)
             {
                 case "Wi-Fi":
-                    ((StandardRoom)r).RequireWifi = input.Value;
+                    ((StandardRoom)roomsList).RequireWifi = input.Value;
                     break;
                 case "breakfast":
-                    ((StandardRoom)r).RequireBreakfast = input.Value;
+                    ((StandardRoom)roomsList).RequireBreakfast = input.Value;
                     break;
                 case "an additional bed":
-                    ((DeluxeRoom)r).AdditionalBed = input.Value;
+                    ((DeluxeRoom)roomsList).AdditionalBed = input.Value;
                     break;
             }
             break;
@@ -246,11 +208,12 @@ void ConfigureRoom(Room r)
 void CheckinGuest(List<Guest> g, List<Room> r)
 {
     // Shows a list of checked-out guests and prompts the user to select a guest to check-in
+    List<Guest> checkedoutGuests = g.Where(guest => !guest.IsCheckedin).ToList();
     Guest? guest;
-    ListGuests(GetCheckedoutGuests(g));
+    ListGuests(checkedoutGuests);
     while (true)
     {
-        var input = ValidateIntInput(0, GetCheckedoutGuests(g).Count - 1, true, $"Who is checking in? Enter 1 to {GetCheckedoutGuests(g).Count} inclusive: ");
+        var input = ValidateIntInput(0, checkedoutGuests.Count - 1, true, $"Who is checking in? Enter 1 to {checkedoutGuests.Count} inclusive: ");
         if (input == null) continue;
         guest = g[input.Value];
         break;
@@ -275,15 +238,15 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     }
 
     // Creates a new Stay object based on the provided information
-    Stay stay = new Stay(checkinDate.Value, checkoutDate.Value);
+    Stay stay = new(checkinDate.Value, checkoutDate.Value);
 
     // Lists the available rooms and prompts the user to select a room
     bool repeat;
     do
     {
         Console.WriteLine();
-        ListAvailableRooms(r);
-        List<Room> availableRooms = GetAvailableRooms(r);
+        ListRooms(r, "The following rooms are available for check-in:");
+        List<Room> availableRooms = r.Where(room => room.IsAvail).ToList();
 
         while (true)
         {
@@ -324,17 +287,18 @@ void CheckinGuest(List<Guest> g, List<Room> r)
     }
 }
 
-void ExtendStay(List<Guest> g)
+void ExtendStay(List<Guest> guestsList)
 {
     // Shows a list of checked-in guests and prompts the user to select a guest
+    List<Guest> checkedinGuests = guestsList.Where(guest => guest.IsCheckedin).ToList();
     Guest? guest;
-    ListGuests(GetCheckedinGuests(g));
+    ListGuests(checkedinGuests);
     while (true)
     {
-        int? input = ValidateIntInput(0, GetCheckedinGuests(g).Count - 1, true,
-            $"Who would like to extend their stay? Enter 1 to {GetCheckedoutGuests(g).Count} inclusive: ");
+        int? input = ValidateIntInput(0, checkedinGuests.Count - 1, true,
+            $"Who would like to extend their stay? Enter 1 to {checkedinGuests.Count} inclusive: ");
         if (input == null) continue;
-        guest = GetCheckedinGuests(g)[input.Value];
+        guest = checkedinGuests[input.Value];
         break;
     }
 
@@ -343,6 +307,7 @@ void ExtendStay(List<Guest> g)
     DateTime checkoutDate = stay.CheckoutDate;
     while (true)
     {
+        Console.WriteLine();
         int? input = ValidateIntInput(1, 7, false, $"How many days would you like to extend the stay for {guest.Name}? Enter 1 to 7 inclusive: ");
         if (input == null) continue;
         DateTime newCheckoutDate = checkoutDate.AddDays(input.Value);
@@ -362,14 +327,13 @@ void ExtendStay(List<Guest> g)
     }
 }
 
-void ShowRevenueBreakdown(List<Guest> g)
+void ShowRevenueBreakdown(List<Guest> guestsList)
 {
-    int currentYear = DateTime.Today.Year;
     int selectedYear;
     while (true)
     {
         // Additional assumption: the hotel began operations from 2000 onwards, meaning that values before 2000 are invalid.
-        int? input = ValidateIntInput(2000, currentYear + 1, false, "Enter the year: ");
+        int? input = ValidateIntInput(null, null, null, "Enter the year: ");
         if (input == null) continue;
         selectedYear = input.Value;
         break;
@@ -378,7 +342,7 @@ void ShowRevenueBreakdown(List<Guest> g)
     double[] breakdown = new double[12];
     
     // Loops through each Guest and their Stay object and adds the information to the breakdown if the years match
-    foreach (Guest guest in g)
+    foreach (Guest guest in guestsList)
     {
         if (guest.HotelStay.CheckoutDate.Year != selectedYear)
             continue;
@@ -477,7 +441,6 @@ void guest_reg()
     }
 }
 
-
 void guest_details()
 {
     //Creates a variable//
@@ -512,6 +475,7 @@ void guest_details()
     }
     displayguestdeatils(choice);
 }
+
 void displayguestdeatils(int num)
     {
     //Creates a table for the selected option//
@@ -554,9 +518,6 @@ void displayguestdeatils(int num)
 
     }
 }
-    
-
-
 
 void checkoutguest()
 {
@@ -573,7 +534,7 @@ void checkoutguest()
     foreach (Guest g in guests)
     {
         
-        if (g.IsCheckedin == true)
+        if (g.IsCheckedin)
         {   //There is a chance of 2 guest having the same name but the passport num is unique
             Console.WriteLine("{0,0}. {1,0}  Passport Num: {2,0}", num, g.Name,g.PassportNum);
             num += 1;
@@ -654,27 +615,26 @@ void checkoutguest()
             , total_cost.ToString("$0.00"));
         
         while (true)
-        {   // check if the user is eligible for the points system
+        {
+            // check if the user is eligible for the points system
             if (temp_list[choice].Member.Status != "Silver" && temp_list[choice].Member.Status != "Gold")
             {
                 Console.WriteLine("You are not eligible to redeem points as your membership status is below Silver");
                 break;
-            }
-            else
-            {   // Ask if the guest want to use their points
-                bool loop = true;
-                while (loop == true)
-                {
+            }  // Ask if the guest want to use their points
+            bool loop = true;
+            while (loop)
+            {
                 bool? verify = ValidateBooleanInput($"You have {temp_list[choice].Member.Points} points to redeem. Do you want to redeem your points? (Y/N) ");
                 // Loop if any other answer is given
                 if (verify is null)
-                    {
+                {
 
-                    }
+                }
                 
                 else if (verify is not true)
                 {
-                    Console.WriteLine($"You will not use your points");
+                    Console.WriteLine("You will not use your points");
                     Console.Write("Please enter any key to make payment: ");
                     //This readline is soley for they guest to key random stuff in and will not be recorded
                     Console.ReadLine();
@@ -685,8 +645,8 @@ void checkoutguest()
                     int points_to_redeem = 0;
                     while (true)
                     {
-                    int? use_points = ValidateIntInput(0, temp_list[choice].Member.Points, false, $"You have {temp_list[choice].Member.Points} points, how many do you want to redeem?");
-                    if (use_points >= 0 && use_points <= temp_list[choice].Member.Points)
+                        int? use_points = ValidateIntInput(0, temp_list[choice].Member.Points, false, $"You have {temp_list[choice].Member.Points} points, how many do you want to redeem?");
+                        if (use_points >= 0 && use_points <= temp_list[choice].Member.Points)
                         {
                             points_to_redeem = Convert.ToInt32(use_points);
                             break;
@@ -694,11 +654,11 @@ void checkoutguest()
                     }
                     total_cost -= points_to_redeem;
                     Console.WriteLine(
-                            "======================================\n" +
-                            "|Total Bill: {0,24}|\n" +
-                            "" +
-                            "======================================"
-                            , total_cost.ToString("$0.00"));
+                        "======================================\n" +
+                        "|Total Bill: {0,24}|\n" +
+                        "" +
+                        "======================================"
+                        , total_cost.ToString("$0.00"));
                     Console.Write("Please enter any key to make payment: ");
                     //This readline is soley for they guest to key random stuff in and will not be recorded
                     Console.ReadLine();
@@ -706,11 +666,10 @@ void checkoutguest()
                     temp_list[choice].Member.RedeemPoints(points_to_redeem);
                     
                     break;
-                    }
-                    loop = false;
                 }
-                break;
+                loop = false;
             }
+            break;
         }
         temp_list[choice].Member.EarnPoints(total_cost);
         Console.WriteLine($"Your earn {(total_cost/10).ToString("0")} points and currently have {temp_list[choice].Member.Points} points.");
@@ -730,7 +689,8 @@ void checkoutguest()
                     }
                     break;
                     }
-                else if (g.Member.Status == "Ordinary")
+
+                if (g.Member.Status == "Ordinary")
                 {
                     if (g.Member.Points >= 200)
                     {
@@ -748,7 +708,7 @@ void checkoutguest()
     }
 }
 
-void AlterStay(List<Guest> guests)
+void AlterStay(List<Guest> guestsList)
 {
     int num = 1;
     int num_of_people_not_checked_in = 0;
@@ -759,21 +719,21 @@ void AlterStay(List<Guest> guests)
     List<Guest> temp_list = new List<Guest>();
 
     //Only people who are checked in will be displayed//
-    foreach (Guest g in guests)
+    foreach (Guest guest in guestsList)
     {
 
-        if (g.IsCheckedin == true)
+        if (guest.IsCheckedin)
         {   //There is a chance of 2 guest having the same name but the passport num is unique
-            Console.WriteLine("{0,0}. {1,0}  Passport Num: {2,0}", num, g.Name, g.PassportNum);
+            Console.WriteLine("{0,0}. {1,0}  Passport Num: {2,0}", num, guest.Name, guest.PassportNum);
             num += 1;
-            temp_list.Add(g);
+            temp_list.Add(guest);
         }
         else
         {
             num_of_people_not_checked_in += 1;
         }
     }
-    if (num_of_people_not_checked_in == guests.Count())
+    if (num_of_people_not_checked_in == guestsList.Count())
     {
         Console.WriteLine("There are currently No one checked in");
     }
@@ -784,16 +744,16 @@ void AlterStay(List<Guest> guests)
         if (user_choice > temp_list.Count())
         {
             Console.WriteLine("Please enter a valid option");
-            AlterStay(guests);
+            AlterStay(guestsList);
         }
         else if (user_choice == null)
         {
-            AlterStay(guests);
+            AlterStay(guestsList);
         }
 
         // int g will be the guest we edit when we call guests[g]
         int g = 0;
-        foreach (Guest i in guests)
+        foreach (Guest i in guestsList)
         {
             if (i.PassportNum == temp_list[Convert.ToInt32(user_choice)].PassportNum)
             {
@@ -802,14 +762,14 @@ void AlterStay(List<Guest> guests)
             g += 1;
         }
         displayguestdeatils(g);
-        Guest guest = guests[g];
+        Guest guest = guestsList[g];
         Stay stay = guest.HotelStay;
 
         // Shows a short menu of what to change
         while (true)
         {
             Console.WriteLine();
-            DisplayMenu("Alter a guest's stay", new string[] { "Change check-in date", "Change check-out date", "Change room configuration" });
+            DisplayMenu("Alter a guest's stay", new[] { "Change check-in date", "Change check-out date", "Change room configuration" });
             Console.Write("Enter an option: ");
             string choice = Console.ReadLine();
             Console.WriteLine();
@@ -825,28 +785,26 @@ void AlterStay(List<Guest> guests)
                         DateTime? newDate = ValidateDateTimeInput("dd/MM/yyyy",
                             $"Enter the new {situation} date (dd/MM/yyyy): ",
                             choice == "1" ? DateTime.Today : stay.CheckinDate.AddDays(1), choice == "1" ? "lesser" : "greater");
-                        if (newDate != null)
+                        if (newDate == null) continue;
+                        while (true)
                         {
-                            while (true)
+                            bool? confirm =
+                                ValidateBooleanInput(
+                                    $"Are you sure you want to change the {situation} date from {(choice == "1" ? stay.CheckinDate : stay.CheckoutDate):dd/MM/yyyy} to {newDate:dd/MM/yyyy}? (Y/N) ");
+                            if (confirm is null) continue;
+                            string capitalizedString = situation[..1].ToUpper() + situation[1..];
+                            if (confirm is true)
                             {
-                                bool? confirm =
-                                    ValidateBooleanInput(
-                                        $"Are you sure you want to change the {situation} date from {(choice == "1" ? stay.CheckinDate : stay.CheckoutDate):dd/MM/yyyy} to {newDate:dd/MM/yyyy}? (Y/N) ");
-                                if (confirm is null) continue;
-                                string capitalizedString = situation.Substring(0, 1).ToUpper() + situation.Substring(1);
-                                if (confirm is true)
-                                {
-                                    stay.CheckinDate = Convert.ToDateTime(newDate);
-                                    Console.WriteLine($"{capitalizedString} date changed successfully!");
-                                    break;
-                                }
-
-                                Console.WriteLine($"{capitalizedString} date not changed.");
+                                stay.CheckinDate = Convert.ToDateTime(newDate);
+                                Console.WriteLine($"{capitalizedString} date changed successfully!");
                                 break;
                             }
 
+                            Console.WriteLine($"{capitalizedString} date not changed.");
                             break;
                         }
+
+                        break;
                     } while (true);
                     break;
                 case "3":
@@ -856,7 +814,7 @@ void AlterStay(List<Guest> guests)
                         Room room;
                         if (stay.RoomList.Count > 1)
                         {
-                            displayguestdeatils(guests.IndexOf(guest));
+                            displayguestdeatils(guestsList.IndexOf(guest));
                             int? roomChoice = ValidateIntInput(0, stay.RoomList.Count - 1, true, "Enter the room number to change: ");
                             if (roomChoice is null) continue;
                             room = stay.RoomList[Convert.ToInt32(roomChoice)];
@@ -900,9 +858,9 @@ void AlterStay(List<Guest> guests)
 // work.
 //==========================================================
 
-void InitializeRooms(List<Room> r)
+void InitializeRooms(List<Room> roomsList)
 {
-    using StreamReader sr = new StreamReader("Rooms.csv");
+    using StreamReader sr = new("Rooms.csv");
     string? line = sr.ReadLine();
     while ((line = sr.ReadLine()) != null)
     {
@@ -917,43 +875,40 @@ void InitializeRooms(List<Room> r)
         };
 
         // Adds the room to the list of rooms
-        r.Add(room);
+        roomsList.Add(room);
     }
 }
 
-void InitializeRoom(List<Room> initRoomList, Room? r, Guest g, string checkedIn, string[] requirements, bool optional = false)
+void InitializeRoom(List<Room> initRoomList, Room? room, Guest guest, string checkedin, string[] requirements, bool optional = false)
 {
     try
     {
-        if (r != null)
+        if (room != null)
         {
-            if (checkedIn == "TRUE")
+            if (checkedin == "TRUE")
             {
-                g.IsCheckedin = true;
-                r.IsAvail = false;
-                if (requirements[0] == "TRUE" && r is StandardRoom sWRoom)
+                guest.IsCheckedin = true;
+                room.IsAvail = false;
+                if (requirements[0] == "TRUE" && room is StandardRoom sWRoom)
                     sWRoom.RequireWifi = true;
-                if (requirements[1] == "TRUE" && r is StandardRoom sBRoom)
+                if (requirements[1] == "TRUE" && room is StandardRoom sBRoom)
                     sBRoom.RequireBreakfast = true;
-                if (requirements[2] == "TRUE" && r is DeluxeRoom dRoom)
+                if (requirements[2] == "TRUE" && room is DeluxeRoom dRoom)
                     dRoom.AdditionalBed = true;
             }
 
-            initRoomList.Add(r);
+            initRoomList.Add(room);
         }
         else
             throw new ArgumentOutOfRangeException(nameof(initRoomList), "A stay must have at least one room.");
     }
-    catch (ArgumentOutOfRangeException argEx)
+    catch (ArgumentOutOfRangeException e)
     {
-        Console.WriteLine(argEx.Message);
+        Console.WriteLine(e.Message);
     }
     catch (FormatException)
     {
-        if (!optional)
-        {
-            Console.WriteLine("Invalid data format. Please check the data file.");
-        }
+        if (!optional) Console.WriteLine("Invalid data format. Please check the data file.");
     }
 }
 
@@ -961,16 +916,16 @@ void InitializeGuests(List<Guest> g, List<Room> r)
 {
     // IMPORTANT: InitializeRooms() must be invoked before this function.
 
-    using StreamReader sr = new StreamReader("Guests.csv");
+    using StreamReader sr = new("Guests.csv");
     string? line = sr.ReadLine();
     while ((line = sr.ReadLine()) != null)
     {
         string[] data = line.Split(',');
-        Guest guest = new Guest();
+        Guest guest = new();
 
         // Creates a stay object
         Stay? stay = null;
-        using (StreamReader staySR = new StreamReader("Stays.csv"))
+        using (StreamReader staySR = new("Stays.csv"))
         {
             string? stayLine = staySR.ReadLine();
 
@@ -997,7 +952,7 @@ void InitializeGuests(List<Guest> g, List<Room> r)
         }
 
         // Creates a membership object
-        Membership membership = new Membership(data[2], Convert.ToInt32(data[3]));
+        Membership membership = new(data[2], Convert.ToInt32(data[3]));
 
         // Creates a guest object
         guest.Name = data[0];
