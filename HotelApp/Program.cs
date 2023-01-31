@@ -45,6 +45,9 @@ while (cont)
         case "8":
             ShowRevenueBreakdown(guests);
             break;
+        case "9":
+            alterstay();
+            break;
         case "0":
             cont = false;
             break;
@@ -64,7 +67,7 @@ void DisplayMenu()
 {
     Console.WriteLine("========== ICT Hotel Guest Management System ==========");
 
-    string[] options = { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest","Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year" };
+    string[] options = { "List all guests", "List all available rooms", "Register a new guest", "Check-in a guest","Check-out a guest", "Show stay details for a guest", "Extend a guest's stay", "Display monthly breakdown for year", "Alter Stay" };
     for (int i = 0; i < options.Length; i++)
         Console.WriteLine($"[{i + 1}] {options[i]}");
     Console.WriteLine("[0] Exit");
@@ -594,16 +597,17 @@ void guest_reg()
 void guest_details()
 {
     //Creates a variable//
-    
+
     int choice;
     // Prompts the user for the Guest to view//
-    while (true) {
+    while (true)
+    {
         int i = 1;
         Console.WriteLine("Select a Guest to View:");
         //Display the guest with number options using the variable created before as number indicator//
-        foreach(Guest g in guests)
+        foreach (Guest g in guests)
         {
-            Console.WriteLine("{0,0}. {1,0}",i, g.Name);
+            Console.WriteLine("{0,0}. {1,0}", i, g.Name);
             i += 1;
         }
         //Check if the option selected is valid if not retry//
@@ -613,41 +617,44 @@ void guest_details()
         {
             Console.WriteLine("Please enter a valid option");
         }
-        else if (choice < 1)
+        else if (choice < 0)
         {
-
+            Console.WriteLine("Please enter a valid option");
         }
         else
         {
             break;
         }
     }
-        
+    displayguestdeatils(choice);
+}
+void displayguestdeatils(int num)
+    {
     //Creates a table for the selected option//
     Console.WriteLine(
         "----------------------------------------------------------------------------------------------------------------------------\n" +
         "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
         "----------------------------------------------------------------------------------------------------------------------------\n" +
-        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n"+
+        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
         "----------------------------------------------------------------------------------------------------------------------------"
-        , "Name","Passport Number","Checkin Date","Checkout Date","Number of rooms","Membership Status","Current points","Checked in",
-        guests[choice].Name, guests[choice].PassportNum, guests[choice].HotelStay.CheckinDate.ToString("dd/mm/yyyy"), guests[choice].HotelStay.CheckoutDate.ToString("dd/mm/yyyy"),
-        guests[choice].HotelStay.RoomList.Count, guests[choice].Member.Status, guests[choice].Member.Points, guests[choice].IsCheckedin);
-    foreach (Room r in guests[choice].HotelStay.RoomList)
+        , "Name", "Passport Number", "Checkin Date", "Checkout Date", "Number of rooms", "Membership Status", "Current points", "Checked in",
+        guests[num].Name, guests[num].PassportNum, guests[num].HotelStay.CheckinDate.ToString("dd/mm/yyyy"), guests[num].HotelStay.CheckoutDate.ToString("dd/mm/yyyy"),
+        guests[num].HotelStay.RoomList.Count, guests[num].Member.Status, guests[num].Member.Points, guests[num].IsCheckedin);
+    foreach (Room r in guests[num].HotelStay.RoomList)
     {
-        if (r.GetType() == typeof(StandardRoom)) 
-        {
-            StandardRoom s = (StandardRoom)r;
-            Console.WriteLine(
-                        "----------------------------------------------------------------------------------------------------------------------------\n" +
-                        "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
-                        "----------------------------------------------------------------------------------------------------------------------------\n" +
-                        "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
-                        "----------------------------------------------------------------------------------------------------------------------------"
-                        ,"Room Number","Bed Configuration","Daily Rate","RequireWifi","RequireBreakfast","","",""
-                        ,s.RoomNumber,s.BedConfiguration,s.DailyRate,s.RequireWifi,s.RequireBreakfast,"","","");
-        }
-        else if (r.GetType() == typeof(DeluxeRoom))
+    if (r.GetType() == typeof(StandardRoom))
+    {
+        StandardRoom s = (StandardRoom)r;
+        Console.WriteLine(
+                    "----------------------------------------------------------------------------------------------------------------------------\n" +
+                    "|{0,-13}|{1,-18}|{2,-13}|{3,-13}|{4,-16}|{5,-17}|{6,-15}|{7,-10}|\n" +
+                    "----------------------------------------------------------------------------------------------------------------------------\n" +
+                    "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
+                    "----------------------------------------------------------------------------------------------------------------------------"
+                    , "Room Number", "Bed Configuration", "Daily Rate", "RequireWifi", "RequireBreakfast", "", "", ""
+                    , s.RoomNumber, s.BedConfiguration, s.DailyRate, s.RequireWifi, s.RequireBreakfast, "", "", "");
+    }
+    else if (r.GetType() == typeof(DeluxeRoom))
         {
             DeluxeRoom s = (DeluxeRoom)r;
             Console.WriteLine(
@@ -657,12 +664,13 @@ void guest_details()
                         "|{8,-13}|{9,-18}|{10,-13}|{11,-13}|{12,-16}|{13,-17}|{14,-15}|{15,-10}|\n" +
                         "---------------------------------------------------------------------------------------------------------------------------\n"
                         , "Room Number", "Bed Configuration", "Daily Rate", "AdditionalBed", "", "", "", ""
-                        , s.RoomNumber, s.BedConfiguration, s.DailyRate, s.AdditionalBed,"", "", "", "");
+                        , s.RoomNumber, s.BedConfiguration, s.DailyRate, s.AdditionalBed, "", "", "", "");
         }
-       
+
     }
-    
 }
+    
+
 
 
 void checkoutguest()
@@ -821,17 +829,13 @@ void checkoutguest()
             {
                 g.IsCheckedin= false;
                 g.Member.Points = temp_list[choice].Member.Points;
-                if (g.Member.Status == "Gold")
-                {
-
-                }
-                else if (g.Member.Status == "Sliver")
+                if (g.Member.Status == "Sliver")
                     {
-                        if (g.Member.Points >= 200)
-                        {
-                            g.Member.Status = "Gold";
-                            Console.WriteLine("Congrats! You are now a Gold Member!");
-                        }
+                    if (g.Member.Points >= 200)
+                    {
+                        g.Member.Status = "Gold";
+                        Console.WriteLine("Congrats! You are now a Gold Member!");
+                    }
                     break;
                     }
                 else if (g.Member.Status == "Ordinary")
@@ -850,7 +854,86 @@ void checkoutguest()
             }
         }
     }
-    
-    
-   
+}
+
+
+
+void alterstay()
+{
+    int num = 1;
+    int num_of_people_not_checked_in = 0;
+    // Prompts the user for the Guest to Checkout//
+    Console.WriteLine("Select a Guest to Alter:");
+    //Display the guest with number options using the variable created before as number indicator//
+    //Create a temporary list to store people who have checked in. Guest who are not checked in will not be stored
+    List<Guest> temp_list = new List<Guest>();
+
+    //Only people who are checked in will be displayed//
+    foreach (Guest g in guests)
+    {
+
+        if (g.IsCheckedin == true)
+        {   //There is a chance of 2 guest having the same name but the passport num is unique
+            Console.WriteLine("{0,0}. {1,0}  Passport Num: {2,0}", num, g.Name, g.PassportNum);
+            num += 1;
+            temp_list.Add(g);
+        }
+        else
+        {
+            num_of_people_not_checked_in += 1;
+        }
+    }
+    if (num_of_people_not_checked_in == guests.Count)
+    {
+        Console.WriteLine("There are currently No one checked in");
+    }
+    else
+    {
+        //Check if the option selected is valid if not retry//
+        int? user_choice = ValidateIntInput(0, guests.Count, true, "Your Choice?");
+        if (user_choice > guests.Count)
+        {
+            Console.WriteLine("Please enter a valid option");
+            alterstay();
+        }
+        else if (user_choice == null)
+        {
+            alterstay();
+        }
+
+        // int g will be the guest we edit when we call guests[g]
+        int g = 0;
+        foreach (Guest i in guests)
+        {
+            if (i.PassportNum == temp_list[Convert.ToInt32(user_choice)].PassportNum)
+            {
+                break;
+            }
+            g += 1;
+        }
+        displayguestdeatils(g);
+        if (guests[g].HotelStay.RoomList.Count > 1) 
+        {
+            Console.WriteLine("Which Room do you want to change? (Input Room Number)");
+        }
+        else
+        {
+            foreach (Room r in guests[g].HotelStay.RoomList)
+            {
+                if (r.GetType() == typeof(DeluxeRoom))
+                {
+                    Console.WriteLine(
+                    "1. Additional bed");
+                }
+                else
+                {
+                    Console.WriteLine(
+                    "1. Wifi\n" +
+                    "2. Breakfast");
+                }
+            }
+            int? stay_edit = ValidateIntInput(0, guests.Count, true, "What do you want to Add?");
+        }
+
+    }
 }
