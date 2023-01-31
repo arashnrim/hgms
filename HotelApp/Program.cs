@@ -157,12 +157,12 @@ DateTime? ValidateDateTimeInput(string format, string prompt, DateTime? compareD
         switch (comparison)
         {
             case "greater":
-                if (difference > 0)
+                if (difference >= 0)
                     return input;
                 throw new ArgumentOutOfRangeException(nameof(input),
                     $"The given date is before the date {compareDate:dd/MM/yyyy}.");
             case "lesser":
-                if (difference < 0)
+                if (difference <= 0)
                     return input;
                 throw new ArgumentOutOfRangeException(nameof(input),
                     $"The given date is after the date {compareDate:dd/MM/yyyy}.");
@@ -816,7 +816,8 @@ void AlterStay(List<Guest> guests)
                     {
                         string situation = choice == "1" ? "check-in" : "check-out";
                         DateTime? newDate = ValidateDateTimeInput("dd/MM/yyyy",
-                            $"Enter the new {situation} date (dd/MM/yyyy): ", DateTime.Today, "lesser");
+                            $"Enter the new {situation} date (dd/MM/yyyy): ",
+                            choice == "1" ? DateTime.Today : stay.CheckinDate.AddDays(1), choice == "1" ? "lesser" : "greater");
                         if (newDate != null)
                         {
                             while (true)
@@ -872,20 +873,7 @@ void AlterStay(List<Guest> guests)
                         }
 
                         ConfigureRoom(room);
-
-                        // Prompt the user to confirm the changes
-                        do
-                        {
-                            bool? confirm = ValidateBooleanInput("Are you sure you want to make these changes? (Y/N) ");
-                            if (confirm is null) continue;
-                            if (confirm is true)
-                            {
-                                Console.WriteLine("Changes made successfully!");
-                                break;
-                            }
-                            Console.WriteLine("Changes not made.");
-                            break;
-                        } while (true);
+                        Console.WriteLine("Room configuration changed successfully!");
 
                         break;
                     } while (true);
