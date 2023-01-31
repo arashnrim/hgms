@@ -595,11 +595,11 @@ void checkoutguest()
         if (user_choice > temp_list.Count-1)
         {
             Console.WriteLine("Please enter a valid option");
-            guest_details();
+            checkoutguest();
         }
         else if (user_choice == null)
         {
-            guest_details();
+            checkoutguest();
         }
         int choice = Convert.ToInt32(user_choice);
         
