@@ -591,8 +591,8 @@ void checkoutguest()
     else
     {
         //Check if the option selected is valid if not retry//
-        int? user_choice = ValidateIntInput(0, guests.Count, true, "Your Choice?");
-        if (user_choice > guests.Count)
+        int? user_choice = ValidateIntInput(0, temp_list.Count-1, true, "Your Choice?");
+        if (user_choice > temp_list.Count-1)
         {
             Console.WriteLine("Please enter a valid option");
             guest_details();
