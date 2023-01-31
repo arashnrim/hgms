@@ -524,7 +524,7 @@ void displayguestdeatils(int num)
         "|{13,-18}|{14,-18}|{15,-18}|{16,-18}|{17,-18}|\n" +
         "------------------------------------------------------------------------------------------------"
         , "Name", "Passport Number", "Checkin Date", "Checkout Date", ""
-        , guests[num].Name, guests[num].PassportNum, guests[num].HotelStay.CheckinDate.ToString("dd/mm/yyyy"), guests[num].HotelStay.CheckoutDate.ToString("dd/mm/yyyy"),""
+        , guests[num].Name, guests[num].PassportNum, guests[num].HotelStay.CheckinDate.ToString("dd/MM/yyyy"), guests[num].HotelStay.CheckoutDate.ToString("dd/MM/yyyy"),""
         ,"Number of rooms", "Membership Status", "Current points", "Checked in",""
         ,guests[num].HotelStay.RoomList.Count, guests[num].Member.Status, guests[num].Member.Points, guests[num].IsCheckedin, "");
     foreach (Room r in guests[num].HotelStay.RoomList)
