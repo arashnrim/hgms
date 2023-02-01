@@ -2,11 +2,11 @@
 
 # hgms
 
-Welcome to the repository for the ICT Hotel Management System! This repo was created for an academic module based on programming with C#.
+Welcome to the repository for the ICT Hotel Guest Management System! This repo was created for an academic module based on programming with C#.
 
 ## About the project
 
-This project is created as part of the assignment component of the module. Students are expected to put their knowledge to practical use by completing this assignment. The following is an opener of the assignment provided to students to contextualise the scenario:
+This project was created as part of the assignment component of the module. Students are expected to put their knowledge to practical use by completing this assignment. The following is an opener of the assignment provided to students to contextualise the scenario:
 
 > In this assignment, you are to apply Object Oriented Programming to develop a simple Hotel Guest Management System. The assignment requirements described below are broken down into 2 stages of development, described in this document as 'Basic Features' and 'Advanced Features'. You are advised to do your programming progressively in these stages. Refer to the 'Grading Criteria' to have an idea of how the different components are graded.
 
